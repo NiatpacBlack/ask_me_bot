@@ -1,0 +1,2 @@
+class CantTableError(Exception):
+    pass
