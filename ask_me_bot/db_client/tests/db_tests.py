@@ -2,7 +2,7 @@ from unittest import TestCase, main
 
 from psycopg2 import errors
 
-from config import DB_NAME, DB_USER, DB_PASSWORD, DB_HOST
+from ask_me_bot.config import DB_NAME, DB_USER, DB_PASSWORD, DB_HOST
 from ask_me_bot.db_client.db import PostgresClient
 from ask_me_bot.db_client.exceptions import CantTableError
 
