@@ -135,6 +135,16 @@ class PostgresClientTest(TestCase):
             len(self.postgres_client.select_all_tables_name_from_db()), tables_count
         )
 
+    def test_error_create_table(self):
+        """Test of the function that creates a table in the database for creation errors."""
+
+        # Create a test table.
+        with self.assertRaises(errors.SyntaxError):
+            self.postgres_client.create_table(
+                table_name="new_test_table",
+                values_pattern="testTEXT,test1VARCHAR(20),est2INTEGER",
+            )
+
     def test_insert_and_delete_value_in_table(self):
         """Test of a function that adds data to a specific table and a function that deletes data from a table."""
 
