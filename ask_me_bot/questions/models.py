@@ -1,6 +1,7 @@
 """This file describes the tables of questions, answers and topics."""
 from ask_me_bot.config import DB_NAME, DB_USER, DB_PASSWORD, DB_HOST
-from ask_me_bot.db_client.db import PostgresClient, errors
+from ask_me_bot.db_client.db import PostgresClient
+
 
 postgres_client = PostgresClient(
     dbname=DB_NAME,
