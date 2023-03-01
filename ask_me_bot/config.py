@@ -13,3 +13,12 @@ DB_USER = os.getenv("DB_USER")
 DB_PASSWORD = os.getenv("DB_PASSWORD")
 DB_HOST = os.getenv("DB_HOST")
 DB_PORT = os.getenv("DB_PORT")
+
+
+class FlaskConfig:
+    """Description of all Flask-application configuration settings."""
+
+    # Debug Mode
+    DEBUG = True
+    # The secret key is set either in an environment variable or directly.
+    SECRET_KEY = os.getenv("FLASK_SECRET_KEY") or "any_key"

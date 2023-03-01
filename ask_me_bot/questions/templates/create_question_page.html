@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Add a question to a quiz</title>
+    <!-- Css:-->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.0-beta3/css/bootstrap.min.css"
+          integrity="sha512-N415hCJJdJx+1UBfULt+i+ihvOn42V/kOjOpp1UTh4CZ70Hx5bDlKryWaqEKfY/8EYOu/C2MuyaluJryK1Lb5Q=="
+          crossorigin="anonymous"/>
+    <!-- Scripts:-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.0-beta3/js/bootstrap.min.js"
+            integrity="sha512-mp3VeMpuFKbgxm/XMUU4QQUcJX4AZfV5esgX72JQr7H7zWusV6lLP1S78wZnX2z9dwvywil1VHkHZAqfGOW7Nw=="
+            crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+    <script src="{{ url_for('static', filename='js/scripts.js') }}" defer></script>
+</head>
+<body>
+<div class="d-flex justify-content-center bg-dark">
+    <div class="card text-center text-light bg-secondary mb-4" style="width: 70rem">
+        <div class="card-header"><h2>Add a question in database</h2></div>
+        <div class="card-body">
+            <div class="row">
+                <form id="addQuestionForm">
+                    {{ form.csrf_token() }}
+                    {% for field in form if field.name not in ('csrf_token', 'submit') %}
+                        <div class="my-3 mx-2">
+                            <div class="mb-2">{{ field.label() }}</div>
+                            <div>
+                                {{ field }}
+                                {% for error in field.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                    <div>{{ form.submit }}</div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
