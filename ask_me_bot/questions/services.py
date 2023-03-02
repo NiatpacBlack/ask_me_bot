@@ -38,7 +38,7 @@ def get_sorted_answers_from_question(question: tuple[Any, ...]) -> list[Any, ...
         [answer[2] for answer in answers if answer[3] is False]
 
 
-def get_question_and_answers() -> tuple[str, list[str, ...], int]:
+def get_question_and_answers() -> tuple[str, list[str, ...], int, str]:
     """
     The function receives a random question from the database and answers to it, saves the correct answer,
     shuffles the answers, and returns a tuple with the received data.
@@ -47,12 +47,13 @@ def get_question_and_answers() -> tuple[str, list[str, ...], int]:
     question = get_random_question_from_questions(get_all_questions_from_db())
     answers = get_sorted_answers_from_question(question)
     correct_answer = answers[0]
+    explanation = question[3]
 
     shuffle(answers)
 
     index_current_answer = [index for index, answer in enumerate(answers) if answer == correct_answer][0]
 
-    return question[2], answers, index_current_answer
+    return question[2], answers, index_current_answer, explanation
 
 
 if __name__ == '__main__':
