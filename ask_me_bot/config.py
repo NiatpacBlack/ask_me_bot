@@ -14,6 +14,8 @@ DB_PASSWORD = os.getenv("DB_PASSWORD")
 DB_HOST = os.getenv("DB_HOST")
 DB_PORT = os.getenv("DB_PORT")
 
+# Default path for json file with questions
+EXPORT_PATH = 'export/questions.json'
 
 class FlaskConfig:
     """Description of all Flask-application configuration settings."""
