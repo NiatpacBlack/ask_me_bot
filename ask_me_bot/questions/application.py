@@ -1,9 +1,11 @@
 import json
+from http import HTTPStatus
 
 from flask import Flask
 from flask import render_template, request
 
 from ask_me_bot.config import FlaskConfig, EXPORT_PATH
+from ask_me_bot.questions.converter import parse_data_from_json, insert_data_with_questions_to_database
 from ask_me_bot.questions.forms import CreateQuestionForm
 
 
@@ -47,6 +49,19 @@ def create_question_view():
         "create_question_page.html",
         form=form,
     )
+
+
+@app.route('/push/')
+def push_json_to_database():
+    """Writes data from json file to database."""
+    try:
+        data = parse_data_from_json(path_to_file=EXPORT_PATH)
+        insert_data_with_questions_to_database(data)
+    except Exception as e:
+        return {
+            "error": f"The data has not been loaded into the database. Error information: {e}"
+        }, HTTPStatus.INTERNAL_SERVER_ERROR
+    return {}, HTTPStatus.OK
 
 
 if __name__ == '__main__':

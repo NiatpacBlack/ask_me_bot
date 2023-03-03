@@ -1,37 +1,27 @@
 function success_notification(message) {
-    $.bootstrapGrowl(message, {
+    setTimeout($.bootstrapGrowl(message, {
             type: "success",
             ele: "body",
-            offset: {
-                from: "top",
-                amount: 20
-            },
-            align: "right",
-            width: 400,
-            delay: 4000,
-            allow_dismiss: true,
-            stackup_spacing: 10
+            align: "left",
+            width: 300,
+            allow_dismiss: false,
+            stackup_spacing: 3
         }
-    );
+    ), 2000);
 }
 
 function error_notification(data) {
-    let message = data?.["error_message"] ? "Something went wrong!" : data["error_message"];
+    let error_message = data?.["error"] ? data["error"] : "Something went wrong!";
 
-    $.bootstrapGrowl(message, {
+    setTimeout($.bootstrapGrowl(error_message, {
             type: "danger", // info, success, warning and danger
             ele: "body", // parent container
-            offset: {
-                from: "top",
-                amount: 20
-            },
-            align: "right", // right, left or center
-            width: 400,
-            delay: 4000,
-            allow_dismiss: true,
-            stackup_spacing: 10
+            align: "left", // right, left or center
+            width: 300,
+            allow_dismiss: false,
+            stackup_spacing: 3
         }
-    );
+    ), 2000);
 }
 
 
@@ -52,7 +42,7 @@ $(document).ready(function () {
         });
     });
 
-    $("#pushToDatabaseButton").submit(function (e) {
+    $("#pushToDatabaseButton").on('click', function (e) {
         $.ajax({
             type: "GET",
             url: "/push/",
