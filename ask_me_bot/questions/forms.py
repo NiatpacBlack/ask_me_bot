@@ -5,100 +5,113 @@ from wtforms.validators import DataRequired, Length
 
 class CreateQuestionForm(FlaskForm):
     theme = StringField(
-        'Тема',
+        label='',
+        description='Тема',
         render_kw={
-            'class': 'form-control'
+            'class': 'form-control shadow'
         },
         validators=[DataRequired(), Length(max=50)],
     )
     question = TextAreaField(
-        "Вопрос",
+        label='',
+        description="Вопрос",
         render_kw={
-            'class': 'form-control'
+            'class': 'form-control shadow'
         },
         validators=[DataRequired(), Length(max=255)],
     )
     explanation = StringField(
-        "Объяснение ответа",
+        label='',
+        description="Объяснение ответа",
         render_kw={
-            'class': 'form-control'
+            'class': 'form-control shadow'
         },
         validators=[DataRequired(), Length(max=200)],
     )
     correct_answer = StringField(
-        "Правильный ответ",
+        label='',
+        description="Правильный ответ",
         render_kw={
-            'class': 'form-control'
+            'class': 'form-control shadow'
         },
         validators=[DataRequired(), Length(max=100)],
     )
     incorrect_answer1 = StringField(
-        "1 Неправильный ответ",
+        label='',
+        description="1 Неправильный ответ",
         render_kw={
-            'class': 'form-control'
+            'class': 'form-control shadow'
         },
         validators=[DataRequired(), Length(max=100)],
     )
     incorrect_answer2 = StringField(
-        "2 Неправильный ответ",
+        label='',
+        description="2 Неправильный ответ",
         render_kw={
-            'class': 'form-control'
+            'class': 'form-control shadow'
         },
         validators=[Length(max=100)],
     )
     incorrect_answer3 = StringField(
-        "3 Неправильный ответ",
+        label='',
+        description="3 Неправильный ответ",
         render_kw={
-            'class': 'form-control'
+            'class': 'form-control shadow'
         },
         validators=[Length(max=100)],
     )
     incorrect_answer4 = StringField(
-        "4 Неправильный ответ",
+        label='',
+        description="4 Неправильный ответ",
         render_kw={
-            'class': 'form-control'
+            'class': 'form-control shadow'
         },
         validators=[Length(max=100)],
     )
     incorrect_answer5 = StringField(
-        "5 Неправильный ответ",
+        label='',
+        description="5 Неправильный ответ",
         render_kw={
-            'class': 'form-control'
+            'class': 'form-control shadow'
         },
         validators=[Length(max=100)],
     )
     incorrect_answer6 = StringField(
-        "6 Неправильный ответ",
+        label='',
+        description="6 Неправильный ответ",
         render_kw={
-            'class': 'form-control'
+            'class': 'form-control shadow'
         },
         validators=[Length(max=100)],
     )
     incorrect_answer7 = StringField(
-        "7 Неправильный ответ",
+        label='',
+        description="7 Неправильный ответ",
         render_kw={
-            'class': 'form-control'
+            'class': 'form-control shadow'
         },
         validators=[Length(max=100)],
     )
     incorrect_answer8 = StringField(
-        "8 Неправильный ответ",
+        label='',
+        description="8 Неправильный ответ",
         render_kw={
-            'class': 'form-control'
+            'class': 'form-control shadow'
         },
         validators=[Length(max=100)],
     )
     incorrect_answer9 = StringField(
-        "9 Неправильный ответ",
+        label='',
+        description="9 Неправильный ответ",
         render_kw={
-            'class': 'form-control'
+            'class': 'form-control shadow'
         },
         validators=[Length(max=100)],
     )
     submit = SubmitField(
         "Добавить вопрос",
         render_kw={
-            'class': 'btn btn-success',
+            'class': 'btn-lg btn-success',
             'form': 'addQuestionForm',
         },
     )
