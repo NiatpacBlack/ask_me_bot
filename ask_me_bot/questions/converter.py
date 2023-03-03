@@ -1,9 +1,21 @@
 """This file describes the functionality of adding data from a json file to the database."""
 import json
 
+from ask_me_bot.config import EXPORT_PATH
 from ask_me_bot.questions.exceptions import DataExportError, JsonKeysError, ThemeNotExistedError, QuestionLengthError, \
     ExplanationLengthError, AnswerLengthError, LotIncorrectAnswersError
 from models import postgres_client
+
+
+def add_data_to_json_file(new_data: dict[str, str, str, str, dict[str, str]]) -> None:
+    """Appends the passed data to the json file."""
+    with open(EXPORT_PATH, mode='r+', encoding='utf-8') as file:
+        data = json.load(file)
+        if data.get('data', False):
+            data["data"].append(new_data)
+        else:
+            data["data"] = {}
+        json.dump(data, file)
 
 
 def parse_data_from_json(path_to_file: str) -> list[dict[str, str | dict[str, str]], ...]:

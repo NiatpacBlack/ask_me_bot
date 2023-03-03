@@ -1,11 +1,11 @@
-import json
 from http import HTTPStatus
 
 from flask import Flask
 from flask import render_template, request
 
 from ask_me_bot.config import FlaskConfig, EXPORT_PATH
-from ask_me_bot.questions.converter import parse_data_from_json, insert_data_with_questions_to_database
+from ask_me_bot.questions.converter import parse_data_from_json, insert_data_with_questions_to_database, \
+    add_data_to_json_file
 from ask_me_bot.questions.forms import CreateQuestionForm
 
 
@@ -37,13 +37,8 @@ def create_question_view():
             "incorrect_answers": {key[-1]: value for key, value in request_data.items() if
                                   'incorrect_answer' in key and value}
         }
-        with open(EXPORT_PATH) as f:
-            data = json.load(f)
 
-        data["data"].append(new_data)
-
-        with open(EXPORT_PATH, 'w') as f:
-            json.dump(data, f)
+        add_data_to_json_file(new_data=new_data)
 
     return render_template(
         "create_question_page.html",
