@@ -30,7 +30,7 @@ def create_question_view():
         request_data = request.form.to_dict()
 
         try:
-            new_data = {
+            data = {
                 "theme": request_data["theme"],
                 "question": request_data["question"],
                 "explanation": request_data["explanation"],
@@ -43,7 +43,7 @@ def create_question_view():
                 "error": f"Invalid data passed in the request. Error information: {e}"
             }, HTTPStatus.BAD_REQUEST
 
-        add_data_to_json_file(new_data=new_data)
+        insert_data_with_questions_to_database([data])
         return {}, HTTPStatus.OK
 
     return render_template(

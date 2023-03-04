@@ -17,7 +17,7 @@
                 <th class="text-center">Время изменения</th>
             </tr>
             </thead>
-            <tbody>
+            <tbody style="cursor: pointer">
             {% if questions %}
                 {% for question in questions %}
                     <tr question-id={{ question.question_id }}>
