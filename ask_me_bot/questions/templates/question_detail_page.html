@@ -1,20 +1,23 @@
 {% extends 'base.html' %}
 {% block title %}
-    Добавить новый вопрос
+    Вопрос {{ question.question_id }}
 {% endblock %}
 {% block card_content %}
     <div class="card-header d-flex justify-content-between">
-        <h2 class="mt-3 px-5">Создать новый вопрос</h2>
-        <div>
-            <button id="pushToDatabaseButton" class="btn-lg btn-info m-2 text-white">
-                Загрузить json в базу данных
-            </button>
-            {{ form.submit }}
-        </div>
+        <h2 class="mt-3 px-5">Вопрос {{ question.question_id }}</h2>
+        <button id="editQuestionButton" class="btn-lg btn-warning m-2 text-white" style="display: inline">
+            Редактировать
+        </button>
+        <button id="cancelQuestionButton" class="btn-lg btn-warning" style="display: none">
+            Отменить
+        </button>
+        <button id="saveQuestionButton" type="submit" form="editQuestion" class="btn-lg btn-success" style="display: none">
+            Сохранить
+        </button>
     </div>
     <div class="card-body">
         <div class="row">
-            <form id="addQuestionForm">
+            <form id="editQuestion">
                 {{ form.csrf_token() }}
                 {% for field in form if field.name not in ('csrf_token', 'submit') %}
                     <div class="my-3 mx-2">

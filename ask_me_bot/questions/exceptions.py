@@ -24,3 +24,11 @@ class AnswerLengthError(Exception):
 
 class LotIncorrectAnswersError(Exception):
     pass
+
+
+class GetQuestionWithThemeNameError(Exception):
+    pass
+
+
+class GetAnswersForQuestionError(Exception):
+    pass

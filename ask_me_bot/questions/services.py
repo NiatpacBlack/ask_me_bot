@@ -1,6 +1,6 @@
 """This file contains the business logic of the question's module."""
+from dataclasses import dataclass
 from datetime import datetime
-from typing import Any
 from random import choice, shuffle
 
 import pytz
@@ -9,7 +9,45 @@ from ask_me_bot.config import TIME_ZONE
 from ask_me_bot.questions.models import create_themes_table, create_questions_table, create_answers_table, \
     postgres_client
 from ask_me_bot.questions.exceptions import DataExportError, JsonKeysError, ThemeNotExistedError, QuestionLengthError, \
-    ExplanationLengthError, AnswerLengthError, LotIncorrectAnswersError
+    ExplanationLengthError, AnswerLengthError, LotIncorrectAnswersError, GetQuestionWithThemeNameError, \
+    GetAnswersForQuestionError
+
+
+@dataclass(slots=True, frozen=True)
+class Question:
+    """Description of the question data type."""
+
+    question_id: int
+    theme_id: int
+    question_name: str
+    explanation: str
+    creation_date: datetime
+    modification_date: datetime
+
+
+@dataclass(slots=True, frozen=True)
+class Answer:
+    """Data type description of the answers for question."""
+
+    correct_answer: str
+    incorrect_answers: list[str, ...]
+
+
+@dataclass(slots=True, frozen=True)
+class QuestionWithThemeName(Question):
+    """Description of the question data type."""
+
+    theme_name: str
+
+
+@dataclass(slots=True, frozen=True)
+class QuestionForQuiz:
+    """Description of the question and answer data type for the quiz telegram bot."""
+
+    question_name: str
+    answers: list[str, ...]
+    index_current_answer: int
+    explanation: str
 
 
 def create_all_tables_for_db() -> None:
@@ -19,32 +57,85 @@ def create_all_tables_for_db() -> None:
     create_answers_table()
 
 
-def get_all_questions_from_db() -> list[tuple[Any, ...], ...]:
+def get_all_questions_from_db() -> list[Question, ...]:
     """Returns all questions from the database."""
     questions = postgres_client.select_all_from_table('questions')
-    return questions
+    return [Question(*question) for question in questions]
 
 
-def get_random_question_from_questions(questions: list[tuple[Any, ...], ...]) -> tuple[Any, ...]:
+def get_all_questions_with_theme_name_from_db() -> list[None] | list[QuestionWithThemeName, ...]:
+    """Returns all questions from the database along with the topic title."""
+    postgres_client.cursor.execute("""
+        select question_id, theme_id, question_name, explanation, creation_date, modification_date, theme_name
+        from questions JOIN themes USING(theme_id);
+        """)
+    questions_with_theme_name = postgres_client.cursor.fetchall()
+    return questions_with_theme_name if not questions_with_theme_name else [QuestionWithThemeName(*el) for el in
+                                                                            questions_with_theme_name]
+
+
+def get_random_question_from_questions(questions: list[Question, ...]) -> Question:
     """Returns one random question from the list of questions."""
     question = choice(questions)
     return question
 
 
-def get_sorted_answers_from_question(question: tuple[Any, ...]) -> list[Any, ...]:
+def get_incorrect_answers_for_question(question_id: str) -> list[str, ...] | tuple[None]:
+    """Возвращает список неправильных ответов для вопроса с question_id. """
+    query = f"""select * from answers where question_id = {question_id} and is_right='false';"""
+    postgres_client.cursor.execute(query)
+    incorrect_answers = postgres_client.cursor.fetchall()
+    return [answer[2] for answer in incorrect_answers] if incorrect_answers else ()
+
+
+def get_correct_answer_for_question(question_id: str) -> str | tuple[None]:
+    """Возвращает правильный ответ для вопроса с question_id. """
+    query = f"""select * from answers where question_id = {question_id} and is_right='true';"""
+    postgres_client.cursor.execute(query)
+    correct_answer = postgres_client.cursor.fetchone()
+    return correct_answer[2] if correct_answer else ()
+
+
+def get_answers_for_question(question_id: str) -> Answer:
+    """Returns the answers for the question with question_id."""
+    correct_answer = get_correct_answer_for_question(question_id)
+    incorrect_answers = get_incorrect_answers_for_question(question_id)
+
+    if correct_answer and incorrect_answers:
+        answers = Answer(
+            correct_answer=correct_answer,
+            incorrect_answers=incorrect_answers,
+        )
+        return answers
+    raise GetAnswersForQuestionError(f"Unable to get answer data for question with id {question_id}.")
+
+
+def get_sorted_answers_from_question(question: Question) -> list[str, ...]:
     """
     Returns a list of answers to the question given to question,
     the first element of the list will always be the correct answer.
     """
-    question_id = question[0]
-    query = f"""select * from answers where question_id = {question_id};"""
+    query = f"""select * from answers where question_id = {question.question_id};"""
     postgres_client.cursor.execute(query)
     answers = postgres_client.cursor.fetchall()
     return [answer[2] for answer in answers if answer[3] is True] + \
         [answer[2] for answer in answers if answer[3] is False]
 
 
-def get_question_and_answers() -> tuple[str, list[str, ...], int, str]:
+def get_question_with_theme_name(question_id: str) -> QuestionWithThemeName:
+    query = f"""
+        select question_id, theme_id, question_name, explanation, creation_date, modification_date, theme_name
+        from questions join themes using(theme_id) 
+        where question_id = {question_id};
+        """
+    postgres_client.cursor.execute(query)
+    if question := postgres_client.cursor.fetchone():
+        question = QuestionWithThemeName(*question)
+        return question
+    raise GetQuestionWithThemeNameError("Failed to get question and question subject data.")
+
+
+def get_question_and_answers() -> QuestionForQuiz:
     """
     The function receives a random question from the database and answers to it, saves the correct answer,
     shuffles the answers, and returns a tuple with the received data.
@@ -53,13 +144,12 @@ def get_question_and_answers() -> tuple[str, list[str, ...], int, str]:
     question = get_random_question_from_questions(get_all_questions_from_db())
     answers = get_sorted_answers_from_question(question)
     correct_answer = answers[0]
-    explanation = question[3]
 
     shuffle(answers)
 
     index_current_answer = [index for index, answer in enumerate(answers) if answer == correct_answer][0]
 
-    return question[2], answers, index_current_answer, explanation
+    return QuestionForQuiz(question.question_name, answers, index_current_answer, question.explanation)
 
 
 def get_theme_id_from_theme_name(theme_name: str) -> int:
@@ -76,7 +166,7 @@ def insert_question_in_questions_table(theme_id: int, question: str, explanation
     Returns the id of the added question.
     """
     query = f"""
-        insert into questions (theme_id, question_name, explanation, date_created) 
+        insert into questions (theme_id, question_name, explanation, creation_date) 
         values({theme_id}, '{question}', '{explanation}', '{datetime.now(pytz.timezone(TIME_ZONE))}') 
         RETURNING question_id;
         """
@@ -206,5 +296,6 @@ def _incorrect_answers_validation(incorrect_answers: list[str, ...]) -> list[str
 
 if __name__ == '__main__':
     from ask_me_bot.questions.converter import parse_data_from_json
+    create_all_tables_for_db()
     test_data = parse_data_from_json(path_to_file='export/questions.json')
     insert_data_with_questions_to_database(test_data)

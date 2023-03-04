@@ -27,7 +27,22 @@ function error_notification(data) {
 
 $(document).ready(function () {
 
-    $('#questionsTable').DataTable();
+    let questionTable = $('#questionsTable').DataTable();
+
+    questionTable.on('click', 'tbody tr', function () {
+        let question_id = $(this).attr('question-id');
+        $.ajax({
+            type: "GET",
+            url: `/question/${question_id}/`,
+            success: function () {
+                window.location.href = `/question/${question_id}/`;
+            },
+            error: function (response) {
+                error_notification(response.responseJSON);
+            }
+        });
+
+    });
 
     $("#addQuestionForm").submit(function (e) {
         e.preventDefault();
@@ -40,7 +55,7 @@ $(document).ready(function () {
                 window.location.href = "/";
             },
             error: function (response) {
-                alert(response.responseJSON);
+                error_notification(response.responseJSON);
             }
         });
     });

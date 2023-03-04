@@ -43,10 +43,10 @@ def quiz(message: types.Message) -> None:
     msg = bot.send_poll(
         message.chat.id,
         type="quiz",
-        question=data[0],
-        options=data[1],
-        correct_option_id=data[2],
-        explanation=data[3],
+        question=data.question_name,
+        options=data.answers,
+        correct_option_id=data.index_current_answer,
+        explanation=data.explanation,
         is_anonymous=False,
     )
     bot.register_next_step_handler(msg, blic_or_without_timer)
@@ -60,10 +60,10 @@ def quiz_with_timer(message: types.Message) -> None:
     msg = bot.send_poll(
         message.chat.id,
         type="quiz",
-        question=data[0],
-        options=data[1],
-        correct_option_id=data[2],
-        explanation=data[3],
+        question=data.question_name,
+        options=data.answers,
+        correct_option_id=data.index_current_answer,
+        explanation=data.explanation,
         open_period=5,
         is_anonymous=False,
     )
