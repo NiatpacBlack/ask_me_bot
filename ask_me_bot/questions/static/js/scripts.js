@@ -26,6 +26,9 @@ function error_notification(data) {
 
 
 $(document).ready(function () {
+
+    $('#questionsTable').DataTable();
+
     $("#addQuestionForm").submit(function (e) {
         e.preventDefault();
         let submitForm = $(this).serializeArray()

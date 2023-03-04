@@ -17,6 +17,9 @@ DB_PORT = os.getenv("DB_PORT")
 # Default path for json file with questions
 EXPORT_PATH = 'export/questions.json'
 
+# Default time zone
+TIME_ZONE = "Europe/Minsk"
+
 
 class FlaskConfig:
     """Description of all Flask-application configuration settings."""

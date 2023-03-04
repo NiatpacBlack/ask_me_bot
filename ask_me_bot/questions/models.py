@@ -33,6 +33,7 @@ def create_questions_table() -> None:
         theme_id INTEGER NOT NULL,
         question_name TEXT NOT NULL,
         explanation TEXT NULL,
+        date_created timestamp with time zone NOT NULL,
         FOREIGN KEY (theme_id) REFERENCES themes (theme_id) ON DELETE CASCADE
         """,
     )

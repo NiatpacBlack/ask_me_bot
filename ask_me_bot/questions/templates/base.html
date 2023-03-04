@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>
+        {% block title %}
+            Ask Me Bot Application
+        {% endblock %}
+    </title>
+    <!-- Css:-->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='fonts/RobotoMono-ExtraLight.ttf') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/datatables.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- Scripts:-->
+    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/jquery-3.6.3.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/jquery.bootstrap-growl.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/datatables.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/scripts.js') }}" defer></script>
+</head>
+<body>
+{% block header %}
+    <nav class="navbar navbar-expand navbar-light" style="background-color: #e3f2fd;">
+        <div class="collapse navbar-collapse d-flex justify-content-center">
+            <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+                <li class="nav-item active mx-3">
+                    <a class="nav-link" href="{{ url_for('questions_view') }}">Все вопросы</a>
+                </li>
+                <li class="nav-item active mx-3">
+                    <a class="nav-link" href="{{ url_for('create_question_view') }}">Добавить вопрос</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+{% endblock %}
+{% block content %}
+
+{% endblock %}
+</body>
+</html>

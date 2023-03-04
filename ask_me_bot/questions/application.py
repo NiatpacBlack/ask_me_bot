@@ -4,9 +4,9 @@ from flask import Flask
 from flask import render_template, request
 
 from ask_me_bot.config import FlaskConfig, EXPORT_PATH
-from ask_me_bot.questions.converter import parse_data_from_json, insert_data_with_questions_to_database, \
-    add_data_to_json_file
+from ask_me_bot.questions.converter import parse_data_from_json, add_data_to_json_file
 from ask_me_bot.questions.forms import CreateQuestionForm
+from ask_me_bot.questions.services import get_all_questions_from_db, insert_data_with_questions_to_database
 
 
 def create_app():
@@ -58,10 +58,22 @@ def push_json_to_database():
         data = parse_data_from_json(path_to_file=EXPORT_PATH)
         insert_data_with_questions_to_database(data)
     except Exception as e:
+        print(e)
         return {
             "error": f"The data has not been loaded into the database. Error information: {e}"
         }, HTTPStatus.INTERNAL_SERVER_ERROR
     return {}, HTTPStatus.OK
+
+
+@app.route('/questions/')
+def questions_view():
+    """Displays a table with all questions from the database."""
+    questions = get_all_questions_from_db()
+    print(questions)
+    return render_template(
+        "questions_page.html",
+        questions=questions,
+    )
 
 
 if __name__ == '__main__':
