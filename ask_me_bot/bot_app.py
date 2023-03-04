@@ -3,6 +3,7 @@ from telebot import TeleBot, types
 from questions.services import get_question_and_answers
 from config import BOT_TOKEN
 
+
 bot = TeleBot(BOT_TOKEN)
 
 correct_answer_counter = 0
@@ -42,8 +43,7 @@ def quiz(message: types.Message) -> None:
                       correct_option_id=data[2],
                       explanation=data[3],
                       is_anonymous=False,
-        )
-
+                      )
 
 
 def quiz_with_timer(message):
@@ -58,22 +58,23 @@ def quiz_with_timer(message):
                   explanation=data[3],
                   open_period=15,
                   is_anonymous=False
-        )
+                  )
 
     @bot.poll_answer_handler()
     def handle_poll_answer(pollAnswer):  # pollAnswer stores user data and his answer to QUIZ
         """We fix the selected user's answer in the BLITZ mode.
            If the answer is correct, we immediately send him the next QUIZ.
            And so on until the first wrong answer"""
-        if int(pollAnswer.option_ids[0]) == data[2]: # Compare the selected user answer with the correct answer from the database
+        if int(pollAnswer.option_ids[0]) == data[
+            2]:  # Compare the selected user answer with the correct answer from the database
             global correct_answer_counter
             correct_answer_counter += 1
             quiz_with_timer(message)
         else:
             print('else')
             bot.send_message(
-            message.from_user.id,
-            text=f"В этот раз {pollAnswer.user.username} у тебя {correct_answer_counter} правильных ответов подряд"
+                message.from_user.id,
+                text=f"В этот раз {pollAnswer.user.username} у тебя {correct_answer_counter} правильных ответов подряд"
             )
 
             # Unfinished block:
@@ -86,4 +87,3 @@ def quiz_with_timer(message):
 
 if __name__ == '__main__':
     bot.polling()
-

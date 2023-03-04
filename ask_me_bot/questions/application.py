@@ -27,18 +27,23 @@ def create_question_view():
 
     if request.method == "POST":
         request_data = request.form.to_dict()
-        del request_data['csrf_token']
 
-        new_data = {
-            "theme": request_data["theme"],
-            "question": request_data["question"],
-            "explanation": request_data["explanation"],
-            "correct_answer": request_data["correct_answer"],
-            "incorrect_answers": {key[-1]: value for key, value in request_data.items() if
-                                  'incorrect_answer' in key and value}
-        }
+        try:
+            new_data = {
+                "theme": request_data["theme"],
+                "question": request_data["question"],
+                "explanation": request_data["explanation"],
+                "correct_answer": request_data["correct_answer"],
+                "incorrect_answers": {key[-1]: value for key, value in request_data.items() if
+                                      'incorrect_answer' in key and value}
+            }
+        except KeyError as e:
+            return {
+                "error": f"Invalid data passed in the request. Error information: {e}"
+            }, HTTPStatus.BAD_REQUEST
 
         add_data_to_json_file(new_data=new_data)
+        return {}, HTTPStatus.OK
 
     return render_template(
         "create_question_page.html",
@@ -60,4 +65,4 @@ def push_json_to_database():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()

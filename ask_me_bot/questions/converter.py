@@ -1,4 +1,4 @@
-"""This file describes the functionality of adding data from a json file to the database."""
+"""This file describes the functionality of adding data to json file and from a json file to the database."""
 import json
 
 from ask_me_bot.config import EXPORT_PATH
