@@ -1,16 +1,19 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, TextAreaField, SubmitField
+from wtforms import StringField, TextAreaField, SubmitField, SelectField
 from wtforms.validators import DataRequired, Length
+
+from ask_me_bot.questions.services import get_themes_for_choices
 
 
 class CreateQuestionForm(FlaskForm):
-    theme = StringField(
+    theme = SelectField(
         label='',
         description='Тема',
         render_kw={
-            'class': 'form-control shadow'
+            'class': 'form-select shadow'
         },
-        validators=[DataRequired(), Length(max=50)],
+        validators=[DataRequired()],
+        choices=get_themes_for_choices(),
     )
     question = TextAreaField(
         label='',

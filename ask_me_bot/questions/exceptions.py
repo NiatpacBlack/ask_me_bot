@@ -1,4 +1,8 @@
-class DataExportError(Exception):
+class DataInsertError(Exception):
+    pass
+
+
+class DataUpdateError(Exception):
     pass
 
 

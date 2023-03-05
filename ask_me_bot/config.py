@@ -4,6 +4,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# Variable in which the executable directory of the script is placed
+_basedir = os.path.abspath(os.path.dirname(__file__))
+
 # Telegram bot token
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 
@@ -19,6 +22,12 @@ EXPORT_PATH = 'export/questions.json'
 
 # Default time zone
 TIME_ZONE = "Europe/Minsk"
+
+# Folder for html files
+TEMPLATES_DIR = os.path.join(_basedir, "questions/templates")
+
+# Folder for static files
+STATIC_DIR = os.path.join(_basedir, "questions/static")
 
 
 class FlaskConfig:

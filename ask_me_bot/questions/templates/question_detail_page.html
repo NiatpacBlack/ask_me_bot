@@ -5,25 +5,31 @@
 {% block card_content %}
     <div class="card-header d-flex justify-content-between">
         <h2 class="mt-3 px-5">Вопрос {{ question.question_id }}</h2>
-        <button id="editQuestionButton" class="btn-lg btn-warning m-2 text-white" style="display: inline">
-            Редактировать
-        </button>
-        <button id="cancelQuestionButton" class="btn-lg btn-warning" style="display: none">
-            Отменить
-        </button>
-        <button id="saveQuestionButton" type="submit" form="editQuestion" class="btn-lg btn-success" style="display: none">
-            Сохранить
-        </button>
+        <div>
+            <button id="editQuestionButton" class="btn-lg btn-warning m-2 text-white" style="display: inline">
+                Редактировать
+            </button>
+            <button id="cancelQuestionButton" class="btn-lg btn-danger my-2 text-white" style="display: none">
+                Отменить
+            </button>
+            <button id="saveQuestionButton" type="submit" form="editQuestionForm" class="btn-lg btn-success"
+                    style="display: none">
+                Сохранить
+            </button>
+        </div>
     </div>
     <div class="card-body">
         <div class="row">
-            <form id="editQuestion">
+            <form id="editQuestionForm" question-id="{{ question.question_id }}"
+                  incorrect-answers-id="{{ incorrect_answers_id }}"
+                  correct-answer-id="{{ correct_answer_id }}"
+            >
                 {{ form.csrf_token() }}
-                {% for field in form if field.name not in ('csrf_token', 'submit') %}
+                {% for field in form if field.name not in ('csrf_token', 'submit') if field.data %}
                     <div class="my-3 mx-2">
                         <div class="mb-2">{{ field.label() }}</div>
                         <div class="input-group input-group-lg">
-                            {{ field }}
+                            {{ field(disabled=True) }}
                             <span class="input-group-text shadow"
                                   id="basic-addon2">{{ field.description }}</span>
                             {% for error in field.errors %}
