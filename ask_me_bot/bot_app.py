@@ -8,13 +8,13 @@ from config import BOT_TOKEN
 
 bot = TeleBot(BOT_TOKEN)
 
-total_points = 0
+total_points_in_blitz = 0
 
 correct_user_responses = []
 all_user_responses = []
 
 
-@bot.message_handler(commands=["/"])
+@bot.message_handler(commands=["start"])
 def start(message: types.Message) -> None:
     """Displays a welcome message and start menu to the user."""
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -26,9 +26,9 @@ def start(message: types.Message) -> None:
         text=f"Здравствуйте, {message.from_user.full_name}, выберите действие:",
         reply_markup=markup,
     )
-    bot.register_next_step_handler(msg, blic_or_without_timer)
 
 
+@bot.message_handler(content_types=["text"])
 def blic_or_without_timer(message: types.Message) -> None:
     """Depending on the user's choice, sends him either a quiz with or without time"""
     if message.text == "Викторина без времени":
@@ -39,8 +39,6 @@ def blic_or_without_timer(message: types.Message) -> None:
 
 def quiz(message: types.Message) -> None:
     """Forms from sends a quiz without time"""
-    global total_points
-    total_points += 1
     data = get_question_and_answers()
     msg = bot.send_poll(
         message.chat.id,
@@ -56,8 +54,8 @@ def quiz(message: types.Message) -> None:
 
 def quiz_with_timer(message: types.Message) -> None:
     """Forms and sends a quiz with a timer"""
-    global total_points
-    total_points += 1
+    global total_points_in_blitz
+    total_points_in_blitz += 1
     data = get_question_and_answers()
     msg = bot.send_poll(
         message.chat.id,
@@ -72,7 +70,7 @@ def quiz_with_timer(message: types.Message) -> None:
     time_send = datetime.now().second
     time_end = time_send + 4.5
     while True:
-        if total_responses(len(all_user_responses)) != total_points and time_send < time_end:
+        if total_responses(len(all_user_responses)) != total_points_in_blitz and time_send < time_end:
             time_send += 1
             time.sleep(1)
         elif time_send < time_end:
@@ -88,7 +86,7 @@ def quiz_with_timer(message: types.Message) -> None:
                     )
                     correct_user_responses.clear()
                     all_user_responses.clear()
-                    total_points = 0
+                    total_points_in_blitz = 0
                     bot.register_next_step_handler(msg, blic_or_without_timer)
                 break
             break
@@ -96,11 +94,11 @@ def quiz_with_timer(message: types.Message) -> None:
             bot.send_message(
                 message.chat.id,
                 text=f"Старайся успевать отвечать до того, как кончится время.\n "
-                     f"У тебя {len(correct_user_responses)} правильных ответов из {len(all_user_responses)}"
+                     f"У тебя {len(correct_user_responses)} правильных ответов из {total_points_in_blitz}"
             )
             correct_user_responses.clear()
             all_user_responses.clear()
-            total_points = 0
+            total_points_in_blitz = 0
             bot.register_next_step_handler(msg, blic_or_without_timer)
             break
 
