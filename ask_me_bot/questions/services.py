@@ -206,7 +206,7 @@ def get_theme_id_from_theme_name(theme_name: str) -> int:
     return theme_id
 
 
-def insert_question_in_questions_table(theme_id: int, question: str, explanation: str) -> int:
+def insert_question_in_questions_table(theme_id: str, question: str, explanation: str) -> int:
     """
     Adds a question subject, question, and answer explanation to the question table in the database.
     Returns the id of the added question.
@@ -284,15 +284,11 @@ def update_answers_for_question(
 
 def insert_data_with_questions_to_database(data: list[dict[str, str | dict[str, str]], ...]) -> None:
     """Adds submitted data related to quiz questions to database tables."""
-    try:
-        for dictionary in data:
-            question: QuestionForDatabase = _validate_question_data(dictionary)
-            theme_id = get_theme_id_from_theme_name(theme_name=question.theme)
-            if not get_question_id_from_question_name(question_name=question.question):
-                question_id = insert_question_in_questions_table(theme_id, question.question, question.explanation)
-                insert_answers_for_question(question_id, question.correct_answer, question.incorrect_answers)
-    except Exception as e:
-        raise DataInsertError(f"An unexpected error occurred while trying to insert data to the database. Info: {e}")
+    for dictionary in data:
+        question: QuestionForDatabase = _validate_question_data(dictionary)
+        if not get_question_id_from_question_name(question_name=question.question):
+            question_id = insert_question_in_questions_table(question.theme_id, question.question, question.explanation)
+            insert_answers_for_question(question_id, question.correct_answer, question.incorrect_answers)
 
 
 def update_question_in_database(
@@ -306,6 +302,11 @@ def update_question_in_database(
     update_question_in_questions_table(question.theme_id, question_id, question.question, question.explanation)
     update_answers_for_question(correct_answer_id, incorrect_answers_id, question.correct_answer,
                                 question.incorrect_answers)
+
+
+def delete_question_from_database(question_id: str) -> None:
+    """Deletes the question with question_id from the database."""
+    postgres_client.delete_value_in_table('questions', f'question_id = {int(question_id)}')
 
 
 def _validate_question_data(data) -> QuestionForDatabase:

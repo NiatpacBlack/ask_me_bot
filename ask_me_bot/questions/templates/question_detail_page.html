@@ -6,8 +6,12 @@
     <div class="card-header d-flex justify-content-between">
         <h2 class="mt-3 px-5">Вопрос {{ question.question_id }}</h2>
         <div>
-            <button id="editQuestionButton" class="btn-lg btn-warning m-2 text-white" style="display: inline">
+            <button id="editQuestionButton" class="btn-lg btn-warning my-2 text-white" style="display: inline">
                 Редактировать
+            </button>
+            <button id="deleteQuestionButton" class="btn-lg btn-danger text-white" style="display: inline"
+                    question-id="{{ question.question_id }}">
+                Удалить
             </button>
             <button id="cancelQuestionButton" class="btn-lg btn-danger my-2 text-white" style="display: none">
                 Отменить

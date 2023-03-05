@@ -8,7 +8,7 @@ from ask_me_bot.questions.converter import parse_data_from_json
 from ask_me_bot.questions.forms import CreateQuestionForm
 from ask_me_bot.questions.services import insert_data_with_questions_to_database, \
     get_all_questions_with_theme_name_from_db, get_question_with_theme_name, get_answers_for_question, \
-    parse_request_data_to_question_format, update_question_in_database
+    parse_request_data_to_question_format, update_question_in_database, delete_question_from_database
 
 
 class CreateQuestionView(MethodView):
@@ -103,3 +103,13 @@ class QuestionView(MethodView):
                 }, HTTPStatus.BAD_REQUEST
             update_question_in_database(data, question_id, correct_answer_id, incorrect_answers_id)
             return {}, HTTPStatus.OK
+
+    def delete(self, question_id: str):
+        try:
+            delete_question_from_database(question_id)
+        except Exception as e:
+            print(e)
+            return {
+                "error": f"Failed to delete question number {question_id}. Error information: {e}"
+            }, HTTPStatus.INTERNAL_SERVER_ERROR
+        return {}, HTTPStatus.OK

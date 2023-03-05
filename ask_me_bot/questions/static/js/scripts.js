@@ -136,6 +136,29 @@ $(document).ready(function () {
         actionQuestion(this, 'cancel');
     });
 
-    $("#saveQuestionButton").click(function () {
+    $("#deleteQuestionButton").click(function () {
+        let question_id = $(this).attr('question-id');
+
+        $.confirm({
+            title: 'Удалить вопрос',
+            content: 'Вы уверены, что хотите удалить этот вопрос?',
+            buttons: {
+                confirm: function () {
+                    $.ajax({
+                        type: "DELETE",
+                        url: `/question/${question_id}/`,
+                        success: function () {
+                            window.location.href = "/questions/";
+                        },
+                        error: function (response) {
+                            error_notification(response.responseJSON);
+                        }
+                    });
+                },
+                cancel: function () {
+                    $.alert('Отменено!');
+                }
+            }
+        });
     });
 });
