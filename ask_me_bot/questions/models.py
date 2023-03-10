@@ -57,3 +57,14 @@ def create_answers_table() -> None:
         FOREIGN KEY (question_id) REFERENCES questions (question_id) ON DELETE CASCADE
         """,
     )
+
+
+def create_all_tables_for_db() -> None:
+    """Create all tables for the database."""
+    create_themes_table()
+    create_questions_table()
+    create_answers_table()
+
+
+if __name__ == '__main__':
+    create_all_tables_for_db()

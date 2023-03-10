@@ -7,11 +7,10 @@ from typing import Any
 import pytz
 
 from ask_me_bot.config import TIME_ZONE
-from ask_me_bot.questions.models import create_themes_table, create_questions_table, create_answers_table, \
-    postgres_client
-from ask_me_bot.questions.exceptions import DataInsertError, JsonKeysError, ThemeNotExistedError, QuestionLengthError, \
+from ask_me_bot.questions.exceptions import DataKeysError, ThemeNotExistedError, QuestionLengthError, \
     ExplanationLengthError, AnswerLengthError, LotIncorrectAnswersError, GetQuestionWithThemeNameError, \
-    GetAnswersForQuestionError, DataUpdateError
+    GetAnswersForQuestionError
+from ask_me_bot.questions.models import postgres_client
 
 
 @dataclass(slots=True, frozen=True)
@@ -70,16 +69,8 @@ class QuestionForQuiz:
     explanation: str
 
 
-def create_all_tables_for_db() -> None:
-    """Create all tables for the database."""
-    create_themes_table()
-    create_questions_table()
-    create_answers_table()
-
-
 def get_themes_for_choices() -> list[tuple[str, str]]:
-    """Получить список тем для SelectField in CreateQuestionForm."""
-    # postgres_client.cursor.execute("""select ROW_NUMBER() over(order by theme_name), theme_name from themes;""")
+    """Get list of topics for SelectField in CreateQuestionForm."""
     postgres_client.cursor.execute("""select * from themes;""")
     themes = postgres_client.cursor.fetchall()
     return themes
@@ -120,7 +111,7 @@ def get_incorrect_answers_for_question(question_id: str) -> list[Answer, ...] | 
 
 
 def get_correct_answer_for_question(question_id: str) -> Answer | tuple[None]:
-    """Возвращает правильный ответ для вопроса с question_id. """
+    """Returns the correct answer for the question with question_id."""
     query = f"""select * from answers where question_id = {question_id} and is_right='true';"""
     postgres_client.cursor.execute(query)
     correct_answer = postgres_client.cursor.fetchone()
@@ -322,7 +313,7 @@ def _validate_question_data(data) -> QuestionForDatabase:
             )
         )
     except KeyError:
-        raise JsonKeysError("Invalid data received as input from json file.")
+        raise DataKeysError("Invalid input data, you need to pass data with fields corresponding to the quiz question.")
     return result
 
 
@@ -397,8 +388,5 @@ def _incorrect_answers_validation(incorrect_answers: list[str, ...]) -> list[str
 
 if __name__ == '__main__':
     from ask_me_bot.questions.converter import parse_data_from_json
-
-
-    create_all_tables_for_db()
     test_data = parse_data_from_json(path_to_file='export/questions.json')
     insert_data_with_questions_to_database(test_data)

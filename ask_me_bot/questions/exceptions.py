@@ -6,7 +6,7 @@ class DataUpdateError(Exception):
     pass
 
 
-class JsonKeysError(Exception):
+class DataKeysError(Exception):
     pass
 
 
