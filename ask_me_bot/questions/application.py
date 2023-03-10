@@ -5,10 +5,11 @@ from flask.views import MethodView
 
 from ask_me_bot.config import EXPORT_PATH
 from ask_me_bot.questions.converter import parse_data_from_json
-from ask_me_bot.questions.forms import CreateQuestionForm
+from ask_me_bot.questions.forms import CreateQuestionForm, CreateThemeForm
 from ask_me_bot.questions.services import insert_data_with_questions_to_database, \
     get_all_questions_with_theme_name_from_db, get_question_with_theme_name, get_answers_for_question, \
-    parse_request_data_to_question_format, update_question_in_database, delete_question_from_database
+    parse_request_data_to_question_format, update_question_in_database, delete_question_from_database, \
+    parse_request_data_to_theme_format, insert_data_with_theme_to_database
 
 
 class CreateQuestionView(MethodView):
@@ -113,3 +114,34 @@ class QuestionView(MethodView):
                 "error": f"Failed to delete question number {question_id}. Error information: {e}"
             }, HTTPStatus.INTERNAL_SERVER_ERROR
         return {}, HTTPStatus.OK
+
+
+class CreateThemeView(MethodView):
+    def get(self):
+        return render_template(
+            "create_theme_page.html",
+            form=CreateThemeForm(),
+        )
+
+    def post(self):
+        try:
+            data = parse_request_data_to_theme_format(request.form.to_dict())
+        except KeyError as e:
+            return {
+                "error": f"Invalid data passed in the request. Error information: {e}"
+            }, HTTPStatus.BAD_REQUEST
+
+        insert_data_with_theme_to_database(data)
+        return {}, HTTPStatus.OK
+
+
+class ThemeView(MethodView):
+
+    def get(self, theme_id: str):
+        pass
+
+
+class ThemesView(MethodView):
+
+    def get(self):
+        pass

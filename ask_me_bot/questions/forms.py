@@ -5,6 +5,24 @@ from wtforms.validators import DataRequired, Length
 from ask_me_bot.questions.services import get_themes_for_choices
 
 
+class CreateThemeForm(FlaskForm):
+    theme_name = StringField(
+        label='',
+        description='Тема',
+        render_kw={
+            'class': 'form-control shadow'
+        },
+        validators=[DataRequired(), Length(max=100)],
+    )
+    submit = SubmitField(
+        "Добавить тему",
+        render_kw={
+            'class': 'btn-lg btn-success mt-2',
+            'form': 'addThemeForm',
+        },
+    )
+
+
 class CreateQuestionForm(FlaskForm):
     theme = SelectField(
         label='',

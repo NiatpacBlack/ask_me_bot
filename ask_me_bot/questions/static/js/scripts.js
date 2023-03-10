@@ -161,4 +161,20 @@ $(document).ready(function () {
             }
         });
     });
+
+    $("#addThemeForm").submit(function (e) {
+        e.preventDefault();
+        let submitForm = $(this).serializeArray()
+        $.ajax({
+            type: "POST",
+            url: "/create_theme/",
+            data: submitForm,
+            success: function () {
+                window.location.href = "/create_theme/";
+            },
+            error: function (response) {
+                error_notification(response.responseJSON);
+            }
+        });
+    });
 });

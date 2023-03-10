@@ -9,7 +9,7 @@ import pytz
 from ask_me_bot.config import TIME_ZONE
 from ask_me_bot.questions.exceptions import DataKeysError, ThemeNotExistedError, QuestionLengthError, \
     ExplanationLengthError, AnswerLengthError, LotIncorrectAnswersError, GetQuestionWithThemeNameError, \
-    GetAnswersForQuestionError
+    GetAnswersForQuestionError, ExistingThemeError
 from ask_me_bot.questions.models import postgres_client
 
 
@@ -31,6 +31,14 @@ class Answer:
 
     answer_id: int
     answer_name: str
+
+
+@dataclass(slots=True, frozen=True)
+class Theme:
+    """Data type description of the theme."""
+
+    theme_id: int
+    theme_name: str
 
 
 @dataclass(slots=True, frozen=True)
@@ -147,6 +155,12 @@ def parse_request_data_to_question_format(request_data: dict[Any, ...]) -> dict[
     }
 
 
+def parse_request_data_to_theme_format(request_data: dict[Any, ...]) -> dict[str, str]:
+    return {
+        "theme_name": request_data["theme_name"],
+    }
+
+
 def get_sorted_answers_from_question(question: Question) -> list[str, ...]:
     """
     Returns a list of answers to the question given to question,
@@ -189,12 +203,12 @@ def get_question_and_answers() -> QuestionForQuiz:
     return QuestionForQuiz(question.question_name, answers, index_current_answer, question.explanation)
 
 
-def get_theme_id_from_theme_name(theme_name: str) -> int:
+def get_theme_id_from_theme_name(theme_name: str) -> int | None:
     """Returns the id of the theme from the database whose name is passed to theme_name."""
     query = f"""select theme_id from themes where theme_name = '{theme_name}';"""
     postgres_client.cursor.execute(query)
-    theme_id = postgres_client.cursor.fetchone()[0]
-    return theme_id
+    theme_id = postgres_client.cursor.fetchone()
+    return theme_id[0] if theme_id else None
 
 
 def insert_question_in_questions_table(theme_id: str, question: str, explanation: str) -> int:
@@ -251,6 +265,13 @@ def insert_answers_for_question(question_id: int, correct_answer: str, incorrect
         postgres_client.db_connect.commit()
 
 
+def insert_theme_in_themes_table(theme_name: str) -> None:
+    """Add a theme to the themes table in the database."""
+    query = f"""insert into themes (theme_name) values('{theme_name}');"""
+    postgres_client.cursor.execute(query)
+    postgres_client.db_connect.commit()
+
+
 def update_answers_for_question(
         correct_answer_id: str,
         incorrect_answers_id: list[str, ...],
@@ -280,6 +301,12 @@ def insert_data_with_questions_to_database(data: list[dict[str, str | dict[str, 
         if not get_question_id_from_question_name(question_name=question.question):
             question_id = insert_question_in_questions_table(question.theme_id, question.question, question.explanation)
             insert_answers_for_question(question_id, question.correct_answer, question.incorrect_answers)
+
+
+def insert_data_with_theme_to_database(data: dict[str, str]) -> None:
+    """Adds data about a topic to the database."""
+    theme: dict[str, str] = _validate_theme_data(data)
+    insert_theme_in_themes_table(theme['theme_name'])
 
 
 def update_question_in_database(
@@ -315,6 +342,15 @@ def _validate_question_data(data) -> QuestionForDatabase:
     except KeyError:
         raise DataKeysError("Invalid input data, you need to pass data with fields corresponding to the quiz question.")
     return result
+
+
+def _validate_theme_data(data: dict[str, str]) -> dict[str, str]:
+    try:
+        if get_theme_id_from_theme_name(theme_name=data['theme_name']):
+            raise ExistingThemeError("A theme with the same name already exists.")
+    except KeyError:
+        raise DataKeysError("Invalid input data, you need to pass data with fields corresponding to the theme")
+    return data
 
 
 def _theme_validation(theme_name: str) -> str:
@@ -388,5 +424,7 @@ def _incorrect_answers_validation(incorrect_answers: list[str, ...]) -> list[str
 
 if __name__ == '__main__':
     from ask_me_bot.questions.converter import parse_data_from_json
+
+
     test_data = parse_data_from_json(path_to_file='export/questions.json')
     insert_data_with_questions_to_database(test_data)

@@ -36,3 +36,7 @@ class GetQuestionWithThemeNameError(Exception):
 
 class GetAnswersForQuestionError(Exception):
     pass
+
+
+class ExistingThemeError(Exception):
+    pass
