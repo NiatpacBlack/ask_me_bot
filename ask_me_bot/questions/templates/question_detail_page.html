@@ -1,48 +1,55 @@
-{% extends 'base.html' %}
-{% block title %}
-    Вопрос {{ question.question_id }}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/question_detail.js') }}" defer></script>
 {% endblock %}
-{% block card_content %}
-    <div class="card-header d-flex justify-content-between">
-        <h2 class="mt-3 px-5">Вопрос {{ question.question_id }}</h2>
-        <div>
-            <button id="editQuestionButton" class="btn-lg btn-warning my-2 text-white" style="display: inline">
-                Редактировать
-            </button>
-            <button id="deleteQuestionButton" class="btn-lg btn-danger text-white" style="display: inline"
-                    question-id="{{ question.question_id }}">
-                Удалить
-            </button>
-            <button id="cancelQuestionButton" class="btn-lg btn-danger my-2 text-white" style="display: none">
-                Отменить
-            </button>
-            <button id="saveQuestionButton" type="submit" form="editQuestionForm" class="btn-lg btn-success"
-                    style="display: none">
-                Сохранить
-            </button>
-        </div>
+<div class="card-header d-flex justify-content-between">
+    <h2 class="mt-3 px-5">Вопрос {{ question.question_id }}</h2>
+    <div>
+        <button onclick="getAdminPanel()" class="btn-lg btn-info text-white">
+            Назад
+        </button>
+        <button id="editQuestionButton" class="btn-lg btn-warning my-2 text-white" style="display: inline">
+            Редактировать
+        </button>
+        <button id="deleteQuestionButton" class="btn-lg btn-danger text-white" style="display: inline"
+                question-id="{{ question.question_id }}">
+            Удалить
+        </button>
+        <button id="cancelQuestionButton" class="btn-lg btn-danger my-2 text-white" style="display: none">
+            Отменить
+        </button>
+        <button id="saveQuestionButton" type="submit" form="editQuestionForm" class="btn-lg btn-success"
+                style="display: none">
+            Сохранить
+        </button>
     </div>
-    <div class="card-body">
-        <div class="row">
-            <form id="editQuestionForm" question-id="{{ question.question_id }}"
-                  incorrect-answers-id="{{ incorrect_answers_id }}"
-                  correct-answer-id="{{ correct_answer_id }}"
-            >
-                {{ form.csrf_token() }}
-                {% for field in form if field.name not in ('csrf_token', 'submit') if field.data %}
-                    <div class="my-3 mx-2">
-                        <div class="mb-2">{{ field.label() }}</div>
-                        <div class="input-group input-group-lg">
-                            {{ field(disabled=True) }}
-                            <span class="input-group-text shadow"
-                                  id="basic-addon2">{{ field.description }}</span>
-                            {% for error in field.errors %}
-                                {{ error }}
-                            {% endfor %}
-                        </div>
+</div>
+<div class="card-body">
+    <div class="row">
+        <form id="editQuestionForm" question-id="{{ question.question_id }}"
+              incorrect-answers-id="{{ incorrect_answers_id }}"
+              correct-answer-id="{{ correct_answer_id }}"
+        >
+            {{ form.csrf_token() }}
+            {% for field in form if field.name not in ('csrf_token', 'submit') if field.data %}
+                <div class="my-3 mx-2">
+                    <div class="mb-2">{{ field.label() }}</div>
+                    <div class="input-group input-group-lg">
+{#                        {% if field.name == 'theme_id' %}#}
+{#                            {% for choice in field.choices %}#}
+{#                                {% if choice[1] == question.theme_name %}#}
+{#                                    {% choice.selected=True %}#}
+{#                                {% endif %}#}
+{#                            {% endfor %}#}
+{#                        {% endif %}#}
+                        {{ field(disabled=True) }}
+                        <span class="input-group-text shadow"
+                              id="basic-addon2">{{ field.description }}</span>
+                        {% for error in field.errors %}
+                            {{ error }}
+                        {% endfor %}
                     </div>
-                {% endfor %}
-            </form>
-        </div>
+                </div>
+            {% endfor %}
+        </form>
     </div>
-{% endblock %}
+</div>

@@ -16,7 +16,12 @@ def create_themes_table() -> None:
 
     postgres_client.create_table(
         "themes",
-        "theme_id SERIAL PRIMARY KEY, theme_name VARCHAR(255) NOT NULL",
+        """
+        theme_id SERIAL PRIMARY KEY, 
+        theme_name VARCHAR(255) NOT NULL,
+        creation_date timestamp with time zone NOT NULL,
+        modification_date timestamp with time zone NULL
+        """
     )
 
 

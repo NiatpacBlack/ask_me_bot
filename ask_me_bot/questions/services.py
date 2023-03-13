@@ -39,6 +39,8 @@ class Theme:
 
     theme_id: int
     theme_name: str
+    creation_date: datetime
+    modification_date: datetime
 
 
 @dataclass(slots=True, frozen=True)
@@ -79,7 +81,7 @@ class QuestionForQuiz:
 
 def get_themes_for_choices() -> list[tuple[str, str]]:
     """Get list of topics for SelectField in CreateQuestionForm."""
-    postgres_client.cursor.execute("""select * from themes;""")
+    postgres_client.cursor.execute("""select theme_id, theme_name from themes;""")
     themes = postgres_client.cursor.fetchall()
     return themes
 
@@ -90,10 +92,17 @@ def get_all_questions_from_db() -> list[Question, ...]:
     return [Question(*question) for question in questions]
 
 
+def get_all_themes_from_db() -> list[Theme, ...]:
+    """Returns all themes from the database."""
+    themes = postgres_client.select_all_from_table('themes')
+    return [Theme(*theme) for theme in themes]
+
+
 def get_all_questions_with_theme_name_from_db() -> list[None] | list[QuestionWithThemeName, ...]:
     """Returns all questions from the database along with the topic title."""
     postgres_client.cursor.execute("""
-        select question_id, theme_id, question_name, explanation, creation_date, modification_date, theme_name
+        select question_id, theme_id, question_name, explanation, 
+        questions.creation_date, questions.modification_date, theme_name
         from questions JOIN themes USING(theme_id);
         """)
     questions_with_theme_name = postgres_client.cursor.fetchall()
@@ -143,16 +152,18 @@ def get_answers_for_question(question_id: str) -> AnswersForQuestion:
     raise GetAnswersForQuestionError(f"Unable to get answer data for question with id {question_id}.")
 
 
-def parse_request_data_to_question_format(request_data: dict[Any, ...]) -> dict[str, str, str, str, dict[str, str]]:
+def parse_request_data_to_question_format(request_data: dict[Any, ...]) -> QuestionForDatabase:
     """Converts a dictionary of question data into a format suitable for adding the question to the database."""
-    return {
-        "theme_id": request_data["theme"],
-        "question": request_data["question"],
-        "explanation": request_data["explanation"],
-        "correct_answer": request_data["correct_answer"],
-        "incorrect_answers": {key[-1]: value for key, value in request_data.items() if
+    dict_incorrect_answers = {key[-1]: value for key, value in request_data.items() if
                               'incorrect_answer' in key and value and key != 'incorrect_answers_id'}
-    }
+
+    return QuestionForDatabase(
+        theme_id=request_data["theme_id"],
+        question=request_data["question"],
+        explanation=request_data["explanation"],
+        correct_answer=request_data["correct_answer"],
+        incorrect_answers=[answer for answer in dict_incorrect_answers.values()]
+    )
 
 
 def parse_request_data_to_theme_format(request_data: dict[Any, ...]) -> dict[str, str]:
@@ -175,7 +186,8 @@ def get_sorted_answers_from_question(question: Question) -> list[str, ...]:
 
 def get_question_with_theme_name(question_id: str) -> QuestionWithThemeName:
     query = f"""
-        select question_id, theme_id, question_name, explanation, creation_date, modification_date, theme_name
+        select question_id, theme_id, question_name, explanation,
+        questions.creation_date, questions.modification_date, theme_name
         from questions join themes using(theme_id) 
         where question_id = {question_id};
         """
@@ -260,16 +272,25 @@ def insert_answers_for_question(question_id: int, correct_answer: str, incorrect
     answers = [correct_answer]
     answers.extend(incorrect_answers)
     for index, answer in enumerate(answers, 1):
-        insert = f"""insert into answers (question_id, answer_name, is_right) values({question_id}, '{answer}', {"true" if index == 1 else "false"})"""
+        insert = f"""
+            insert into answers (question_id, answer_name, is_right) 
+            values({question_id}, '{answer}', {"true" if index == 1 else "false"})
+            """
         postgres_client.cursor.execute(insert)
         postgres_client.db_connect.commit()
 
 
-def insert_theme_in_themes_table(theme_name: str) -> None:
+def insert_theme_in_themes_table(theme_name: str) -> str:
     """Add a theme to the themes table in the database."""
-    query = f"""insert into themes (theme_name) values('{theme_name}');"""
+    query = f"""
+    insert into themes (theme_name, creation_date) 
+    values('{theme_name}', '{datetime.now(pytz.timezone(TIME_ZONE))}')
+    returning theme_id;
+    """
     postgres_client.cursor.execute(query)
+    theme_id = postgres_client.cursor.fetchone()
     postgres_client.db_connect.commit()
+    return str(theme_id[0])
 
 
 def update_answers_for_question(
@@ -294,32 +315,33 @@ def update_answers_for_question(
         postgres_client.db_connect.commit()
 
 
-def insert_data_with_questions_to_database(data: list[dict[str, str | dict[str, str]], ...]) -> None:
+def insert_data_with_questions_to_database(data: list[QuestionForDatabase, ...]) -> None:
     """Adds submitted data related to quiz questions to database tables."""
-    for dictionary in data:
-        question: QuestionForDatabase = _validate_question_data(dictionary)
+    for question in data:
+        _validate_question_data(question)
         if not get_question_id_from_question_name(question_name=question.question):
             question_id = insert_question_in_questions_table(question.theme_id, question.question, question.explanation)
             insert_answers_for_question(question_id, question.correct_answer, question.incorrect_answers)
 
 
-def insert_data_with_theme_to_database(data: dict[str, str]) -> None:
+def insert_data_with_theme_to_database(data: dict[str, str]) -> str:
     """Adds data about a topic to the database."""
-    theme: dict[str, str] = _validate_theme_data(data)
-    insert_theme_in_themes_table(theme['theme_name'])
+    _validate_theme_data(data)
+    theme_id = insert_theme_in_themes_table(data['theme_name'])
+    return theme_id
 
 
 def update_question_in_database(
-        data: dict[str, str, str, str, dict[str, str]],
+        data: QuestionForDatabase,
         question_id: str,
         correct_answer_id: str,
         incorrect_answers_id: list[str, ...]
 ) -> None:
     """Updates the question and its answers in the database by changing the fields passed to data."""
-    question: QuestionForDatabase = _validate_question_data(data)
-    update_question_in_questions_table(question.theme_id, question_id, question.question, question.explanation)
-    update_answers_for_question(correct_answer_id, incorrect_answers_id, question.correct_answer,
-                                question.incorrect_answers)
+    _validate_question_data(data)
+    update_question_in_questions_table(data.theme_id, question_id, data.question, data.explanation)
+    update_answers_for_question(correct_answer_id, incorrect_answers_id, data.correct_answer,
+                                data.incorrect_answers)
 
 
 def delete_question_from_database(question_id: str) -> None:
@@ -327,43 +349,35 @@ def delete_question_from_database(question_id: str) -> None:
     postgres_client.delete_value_in_table('questions', f'question_id = {int(question_id)}')
 
 
-def _validate_question_data(data) -> QuestionForDatabase:
+def _validate_question_data(data: QuestionForDatabase) -> None:
     """Performs checks on all fields in the received data, returns QuestionForDatabase."""
     try:
-        result = QuestionForDatabase(
-            theme_id=data["theme_id"],
-            question=_question_validation(data["question"]),
-            explanation=_explanation_validation(data["explanation"]),
-            correct_answer=_correct_answer_validation(data["correct_answer"]),
-            incorrect_answers=_incorrect_answers_validation(
-                [answer for answer in data["incorrect_answers"].values()]
-            )
-        )
+        _question_validation(data.question),
+        _explanation_validation(data.explanation),
+        _correct_answer_validation(data.correct_answer),
+        _incorrect_answers_validation(data.incorrect_answers)
     except KeyError:
         raise DataKeysError("Invalid input data, you need to pass data with fields corresponding to the quiz question.")
-    return result
 
 
-def _validate_theme_data(data: dict[str, str]) -> dict[str, str]:
+def _validate_theme_data(data: dict[str, str]) -> None:
     try:
         if get_theme_id_from_theme_name(theme_name=data['theme_name']):
             raise ExistingThemeError("A theme with the same name already exists.")
     except KeyError:
         raise DataKeysError("Invalid input data, you need to pass data with fields corresponding to the theme")
-    return data
 
 
-def _theme_validation(theme_name: str) -> str:
+def _theme_validation(theme_name: str) -> None:
     """Question Topic Title Check: Checks for the existence of such a topic in the database."""
     if not get_theme_id_from_theme_name(theme_name=theme_name):
         raise ThemeNotExistedError(
             f"Theme with this name does not exist in the database, "
             f"create it or check the entered data. Incorrect theme: {theme_name}"
         )
-    return theme_name
 
 
-def _question_validation(question: str) -> str:
+def _question_validation(question: str) -> None:
     """
     Checking the question:
     Question must not exceed 255 characters in length. Restriction of the form of a quiz in a telegram.
@@ -373,10 +387,9 @@ def _question_validation(question: str) -> str:
             f"The length of the question should not exceed 255 characters. "
             f"Check input received from json. Incorrect question: {question}"
         )
-    return question
 
 
-def _explanation_validation(explanation: str) -> str:
+def _explanation_validation(explanation: str) -> None:
     """
     Checking the explanation:
     Explanation must not exceed 200 characters in length. Restriction of the form of a quiz in a telegram.
@@ -386,10 +399,9 @@ def _explanation_validation(explanation: str) -> str:
             f"The length of the explanation should not exceed 200 characters. "
             f"Check input received from json. Incorrect explanation: {explanation}"
         )
-    return explanation
 
 
-def _correct_answer_validation(correct_answer: str) -> str:
+def _correct_answer_validation(correct_answer: str) -> None:
     """
     Checking the correct answer:
     Answer must not exceed 100 characters in length. Restriction of the form of a quiz in a telegram.
@@ -399,10 +411,9 @@ def _correct_answer_validation(correct_answer: str) -> str:
             f"The length of the correct answer should not exceed 100 characters. "
             f"Check input received from json. Incorrect answer: {correct_answer}"
         )
-    return correct_answer
 
 
-def _incorrect_answers_validation(incorrect_answers: list[str, ...]) -> list[str, ...]:
+def _incorrect_answers_validation(incorrect_answers: list[str, ...]) -> None:
     """
     Checking the list of incorrect answers:
     Each answer must not exceed 100 characters in length. Restriction of the form of a quiz in a telegram.
@@ -419,12 +430,9 @@ def _incorrect_answers_validation(incorrect_answers: list[str, ...]) -> list[str
                 f"The length of the correct answer should not exceed 100 characters. "
                 f"Check input received from json. Incorrect answer: {answer}"
             )
-    return incorrect_answers
 
 
 if __name__ == '__main__':
     from ask_me_bot.questions.converter import parse_data_from_json
-
-
     test_data = parse_data_from_json(path_to_file='export/questions.json')
     insert_data_with_questions_to_database(test_data)

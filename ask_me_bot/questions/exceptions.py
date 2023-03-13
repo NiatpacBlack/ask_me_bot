@@ -40,3 +40,7 @@ class GetAnswersForQuestionError(Exception):
 
 class ExistingThemeError(Exception):
     pass
+
+
+class JsonIncorrectData(Exception):
+    pass

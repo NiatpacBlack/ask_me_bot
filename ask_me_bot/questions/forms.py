@@ -2,8 +2,6 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField, SubmitField, SelectField
 from wtforms.validators import DataRequired, Length
 
-from ask_me_bot.questions.services import get_themes_for_choices
-
 
 class CreateThemeForm(FlaskForm):
     theme_name = StringField(
@@ -24,14 +22,13 @@ class CreateThemeForm(FlaskForm):
 
 
 class CreateQuestionForm(FlaskForm):
-    theme = SelectField(
+    theme_id = SelectField(
         label='',
         description='Тема',
         render_kw={
             'class': 'form-select shadow'
         },
         validators=[DataRequired()],
-        choices=get_themes_for_choices(),
     )
     question = TextAreaField(
         label='',
@@ -132,7 +129,7 @@ class CreateQuestionForm(FlaskForm):
     submit = SubmitField(
         "Добавить вопрос",
         render_kw={
-            'class': 'btn-lg btn-success',
+            'class': 'btn-lg btn-success mt-2',
             'form': 'addQuestionForm',
         },
     )

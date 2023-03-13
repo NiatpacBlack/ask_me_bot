@@ -18,7 +18,7 @@ DB_HOST = os.getenv("DB_HOST")
 DB_PORT = os.getenv("DB_PORT")
 
 # Default path for json file with questions
-EXPORT_PATH = 'export/questions.json'
+EXPORT_PATH = 'questions/export/questions.json'
 
 # Default time zone
 TIME_ZONE = "Europe/Minsk"

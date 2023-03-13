@@ -2,6 +2,9 @@
 import json
 
 from ask_me_bot.config import EXPORT_PATH
+from ask_me_bot.questions.exceptions import JsonIncorrectData
+from ask_me_bot.questions.services import QuestionForDatabase, get_theme_id_from_theme_name, \
+    insert_data_with_theme_to_database
 
 
 def add_data_to_json_file(new_data: dict[str, str, str, str, dict[str, str]]) -> None:
@@ -15,7 +18,7 @@ def add_data_to_json_file(new_data: dict[str, str, str, str, dict[str, str]]) ->
         json.dump(data, file)
 
 
-def parse_data_from_json(path_to_file: str) -> list[dict[str, str | dict[str, str]], ...]:
+def parse_data_from_json(path_to_file: str) -> list[QuestionForDatabase, ...]:
     """
     Receives as input the path to the json file containing information for the quiz in the telegram.
     Json file Example:
@@ -37,9 +40,30 @@ def parse_data_from_json(path_to_file: str) -> list[dict[str, str | dict[str, st
     :param path_to_file: 'export/questions.json'
 
     Returns a list of dictionaries, where each dictionary stores data about one quiz question.
+    The json data format was created specifically for entering information without knowing about the theme id
+    or other data from the database.
     """
     with open(path_to_file) as f:
         json_load = json.load(f)
-        data = [el for el in json_load['data']]
+        data = []
+        for el in json_load['data']:
+            try:
+                theme_id = get_theme_id_from_theme_name(theme_name=el['theme'])
+                result = QuestionForDatabase(
+                    theme_id=theme_id if theme_id else insert_data_with_theme_to_database(
+                        data={'theme_name': el['theme']}
+                    ),
+                    question=el['question'],
+                    explanation=el['explanation'],
+                    correct_answer=el['correct_answer'],
+                    incorrect_answers=[answer for answer in el['incorrect_answers'].values()],
+                )
+            except Exception as e:
+                raise JsonIncorrectData(
+                    'The data passed in the json file is incorrect, check the data against the documentation format.'
+                    f'Info: {e}'
+                )
+
+            data.append(result)
 
     return data

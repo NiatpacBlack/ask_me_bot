@@ -9,7 +9,8 @@ from ask_me_bot.questions.forms import CreateQuestionForm, CreateThemeForm
 from ask_me_bot.questions.services import insert_data_with_questions_to_database, \
     get_all_questions_with_theme_name_from_db, get_question_with_theme_name, get_answers_for_question, \
     parse_request_data_to_question_format, update_question_in_database, delete_question_from_database, \
-    parse_request_data_to_theme_format, insert_data_with_theme_to_database
+    parse_request_data_to_theme_format, insert_data_with_theme_to_database, get_all_themes_from_db, \
+    get_themes_for_choices
 
 
 class CreateQuestionView(MethodView):
@@ -22,6 +23,7 @@ class CreateQuestionView(MethodView):
         )
 
     def post(self):
+        print(request.form.to_dict())
         try:
             data = parse_request_data_to_question_format(request.form.to_dict())
         except KeyError as e:
@@ -33,7 +35,7 @@ class CreateQuestionView(MethodView):
         return {}, HTTPStatus.OK
 
 
-class PushJsonToDbView(MethodView):
+class ImportDataToDbView(MethodView):
     """Writes data from json file to database."""
 
     def get(self):
@@ -48,14 +50,16 @@ class PushJsonToDbView(MethodView):
         return {}, HTTPStatus.OK
 
 
-class QuestionsView(MethodView):
-    """Displays a table with all questions from the database."""
+class MainView(MethodView):
+    """Displays a table with all questions and table with all themes from the database."""
 
     def get(self):
         questions = get_all_questions_with_theme_name_from_db()
+        themes = get_all_themes_from_db()
         return render_template(
-            "questions_page.html",
+            "main_page.html",
             questions=questions,
+            themes=themes,
         )
 
 
@@ -74,7 +78,8 @@ class QuestionView(MethodView):
                 "error": f"Failed to get question data with id {question_id}. Error information: {e}"
             }, HTTPStatus.INTERNAL_SERVER_ERROR
 
-        form.theme.data = question_with_theme_name.theme_name
+        form.theme_id.data = question_with_theme_name.theme_name
+        form.theme_id.choices = get_themes_for_choices()
         form.question.data = question_with_theme_name.question_name
         form.explanation.data = question_with_theme_name.explanation
         form.correct_answer.data = answers.correct_answer.answer_name
@@ -99,6 +104,7 @@ class QuestionView(MethodView):
                 incorrect_answers_id = request_data["incorrect_answers_id"].split()
                 correct_answer_id = request_data["correct_answers_id"]
             except KeyError as e:
+                print(e)
                 return {
                     "error": f"Invalid data passed in the request. Error information: {e}"
                 }, HTTPStatus.BAD_REQUEST

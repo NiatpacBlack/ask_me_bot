@@ -11,18 +11,19 @@
         {% endblock %}
     </title>
     <!-- Css:-->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/lib/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='fonts/RobotoMono-ExtraLight.ttf') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/datatables.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/jquery-confirm.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/lib/datatables.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/lib/jquery-confirm.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <!-- Scripts:-->
-    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/jquery-3.6.3.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/jquery.bootstrap-growl.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/datatables.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/jquery-confirm.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/lib/bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/lib/jquery-3.6.3.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/lib/jquery.bootstrap-growl.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/lib/datatables.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/lib/jquery-confirm.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/scripts.js') }}" defer></script>
+    {% block scripts %}{% endblock %}
 </head>
 <body>
 {% block header %}
@@ -30,21 +31,22 @@
         <div class="collapse navbar-collapse d-flex justify-content-center">
             <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
                 <li class="nav-item active mx-3">
-                    <a class="nav-link" href="{{ url_for('questions.questions') }}">Все вопросы</a>
+                    <a class="nav-link" onclick="getAdminPanel()" style="cursor: pointer">Админ панель</a>
                 </li>
                 <li class="nav-item active mx-3">
-                    <a class="nav-link" href="{{ url_for('questions.create_question') }}">Добавить вопрос</a>
+                    <a class="nav-link" onclick="createQuestion()" style="cursor: pointer">Добавить вопрос</a>
                 </li>
                 <li class="nav-item active mx-3">
-                    <a class="nav-link" href="{{ url_for('questions.create_theme') }}">Добавить тему</a>
+                    <a class="nav-link" onclick="createTheme()" style="cursor: pointer">Добавить тему</a>
                 </li>
             </ul>
+            <button id="pushToDatabaseButton" class="btn btn-outline-black m-2 text-muted">Загрузить json в базу данных</button>
         </div>
     </nav>
 {% endblock %}
 {% block content %}
     <div class="d-flex justify-content-center">
-        <div class="card border-info text-center my-5 shadow" style="width: 70rem">
+        <div id="mainCard" class="card border-info text-center my-5 shadow" style="width: 70rem">
             {% block card_content %}
 
 

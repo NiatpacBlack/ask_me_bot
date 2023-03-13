@@ -1,32 +1,32 @@
-{% extends 'base.html' %}
-{% block title %}
-    Добавить новую тему
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/create_theme.js') }}" defer></script>
 {% endblock %}
-{% block card_content %}
-    <div class="card-header d-flex justify-content-between">
-        <h2 class="mt-3 px-5">Создать новую тему</h2>
-        <div>
-            {{ form.submit }}
-        </div>
+<div class="card-header d-flex justify-content-between">
+    <h2 class="mt-3 px-5">Создать новую тему</h2>
+    <div>
+        <button onclick="getAdminPanel()" class="btn-lg btn-info text-white">
+            Назад
+        </button>
+        {{ form.submit }}
     </div>
-    <div class="card-body">
-        <div class="row">
-            <form id="addThemeForm">
-                {{ form.csrf_token() }}
-                {% for field in form if field.name not in ('csrf_token', 'submit') %}
-                    <div class="my-3 mx-2">
-                        <div class="mb-2">{{ field.label() }}</div>
-                        <div class="input-group input-group-lg">
-                            {{ field }}
-                            <span class="input-group-text shadow"
-                                  id="basic-addon2">{{ field.description }}</span>
-                            {% for error in field.errors %}
-                                {{ error }}
-                            {% endfor %}
-                        </div>
+</div>
+<div class="card-body">
+    <div class="row">
+        <form id="addThemeForm">
+            {{ form.csrf_token() }}
+            {% for field in form if field.name not in ('csrf_token', 'submit') %}
+                <div class="my-3 mx-2">
+                    <div class="mb-2">{{ field.label() }}</div>
+                    <div class="input-group input-group-lg">
+                        {{ field }}
+                        <span class="input-group-text shadow"
+                              id="basic-addon2">{{ field.description }}</span>
+                        {% for error in field.errors %}
+                            {{ error }}
+                        {% endfor %}
                     </div>
-                {% endfor %}
-            </form>
-        </div>
+                </div>
+            {% endfor %}
+        </form>
     </div>
-{% endblock %}
+</div>

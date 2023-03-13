@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block title %}
+    Админ панель
+{% endblock %}
+{% block card_content %}
+    <div class="card-body">
+        <div class="mb-5">
+            <h1 class="text-center mt-2">Вопросы</h1>
+            <table id="questionsTable" class="display">
+                <thead>
+                <tr>
+                    <th class="text-center">Id</th>
+                    <th class="text-center">Тема</th>
+                    <th class="text-center">Вопрос</th>
+                    <th class="text-center">Время создания</th>
+                    <th class="text-center">Время изменения</th>
+                </tr>
+                </thead>
+                <tbody style="cursor: pointer">
+                {% if questions %}
+                    {% for question in questions %}
+                        <tr question-id={{ question.question_id }}>
+                            <td>{{ question.question_id }}</td>
+                            <td>{{ question.theme_name }}</td>
+                            <td>{{ question.question_name }}</td>
+                            <td>{{ question.creation_date }}</td>
+                            <td>{{ question.modification_date or '-' }}</td>
+                        </tr>
+                    {% endfor %}
+                {% endif %}
+                </tbody>
+            </table>
+        </div>
+{#        <div class="divider py-1 bg-info"></div>#}
+        <hr class="bg-info pb-sm-1">
+        <div class="mt-5">
+            <h1 class="text-center mt-5">Темы</h1>
+            <table id="themesTable" class="display">
+                <thead>
+                <tr>
+                    <th class="text-center">Id</th>
+                    <th class="text-center">Тема</th>
+                    <th class="text-center">Время создания</th>
+                    <th class="text-center">Время изменения</th>
+                </tr>
+                </thead>
+                <tbody style="cursor: pointer">
+                {% if themes %}
+                    {% for theme in themes %}
+                        <tr theme-id={{ theme.theme_id }}>
+                            <td>{{ theme.theme_id }}</td>
+                            <td>{{ theme.theme_name }}</td>
+                            <td>{{ theme.creation_date }}</td>
+                            <td>{{ theme.modification_date or '-' }}</td>
+                        </tr>
+                    {% endfor %}
+                {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

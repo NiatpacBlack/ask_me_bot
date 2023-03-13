@@ -55,69 +55,77 @@ function actionQuestion(obj, action) {
     }
 }
 
+
+function createQuestion() {
+    let mainCard = $('#mainCard');
+
+    $.ajax({
+        type: "GET",
+        url: `/question/create/`,
+        success: function (html_data) {
+            mainCard.html(html_data);
+        },
+        error: function (response) {
+            error_notification(response.responseJSON);
+        }
+    });
+}
+
+
+function getAdminPanel() {
+
+    $.ajax({
+        type: "GET",
+        url: `/`,
+        success: function (html_data) {
+            $('body').html(html_data);
+        },
+        error: function (response) {
+            error_notification(response.responseJSON);
+        }
+    });
+}
+
+
+function createTheme() {
+    let mainCard = $('#mainCard');
+
+    $.ajax({
+        type: "GET",
+        url: `/theme/create/`,
+        success: function (html_data) {
+            mainCard.html(html_data);
+        },
+        error: function (response) {
+            error_notification(response.responseJSON);
+        }
+    });
+}
+
 $(document).ready(function () {
 
-    let questionTable = $('#questionsTable').DataTable();
+    let questionsTable = $('#questionsTable').DataTable(),
+        themesTable = $('#themesTable').DataTable(),
+        mainCard = $('#mainCard');
 
-    questionTable.on('click', 'tbody tr', function () {
+    questionsTable.on('click', 'tbody tr', function () {
         let question_id = $(this).attr('question-id');
         $.ajax({
             type: "GET",
             url: `/question/${question_id}/`,
-            success: function () {
-                window.location.href = `/question/${question_id}/`;
-            },
-            error: function (response) {
-                error_notification(response.responseJSON);
-            }
-        });
-
-    });
-
-    $("#addQuestionForm").submit(function (e) {
-        e.preventDefault();
-        let submitForm = $(this).serializeArray()
-        $.ajax({
-            type: "POST",
-            url: "/",
-            data: submitForm,
-            success: function () {
-                window.location.href = "/";
+            success: function (html_data) {
+                mainCard.html(html_data);
             },
             error: function (response) {
                 error_notification(response.responseJSON);
             }
         });
     });
-
-    $("#editQuestionForm").submit(function (e) {
-        e.preventDefault();
-        let submitForm = $(this).serializeArray(),
-            question_id = $(this).attr('question-id'),
-            incorrect_answers_id = $(this).attr('incorrect-answers-id'),
-            correct_answer_id = $(this).attr('correct-answer-id');
-
-        submitForm.push({"name": "incorrect_answers_id", "value": incorrect_answers_id})
-        submitForm.push({"name": "correct_answers_id", "value": correct_answer_id})
-        console.log(submitForm)
-        $.ajax({
-            type: "PUT",
-            url: `/question/${question_id}/`,
-            data: submitForm,
-            success: function () {
-                success_notification("Data successfully changed in the database");
-            },
-            error: function (response) {
-                error_notification(response.responseJSON);
-            }
-        });
-    });
-
 
     $("#pushToDatabaseButton").on('click', function (e) {
         $.ajax({
             type: "GET",
-            url: "/push/",
+            url: "/import/",
             success: function () {
                 success_notification("Data successfully added to the database");
             },
@@ -127,54 +135,4 @@ $(document).ready(function () {
         });
     });
 
-    $("#editQuestionButton").click(function () {
-        actionQuestion(this, 'edit');
-    });
-
-
-    $("#cancelQuestionButton").click(function () {
-        actionQuestion(this, 'cancel');
-    });
-
-    $("#deleteQuestionButton").click(function () {
-        let question_id = $(this).attr('question-id');
-
-        $.confirm({
-            title: 'Удалить вопрос',
-            content: 'Вы уверены, что хотите удалить этот вопрос?',
-            buttons: {
-                confirm: function () {
-                    $.ajax({
-                        type: "DELETE",
-                        url: `/question/${question_id}/`,
-                        success: function () {
-                            window.location.href = "/questions/";
-                        },
-                        error: function (response) {
-                            error_notification(response.responseJSON);
-                        }
-                    });
-                },
-                cancel: function () {
-                    $.alert('Отменено!');
-                }
-            }
-        });
-    });
-
-    $("#addThemeForm").submit(function (e) {
-        e.preventDefault();
-        let submitForm = $(this).serializeArray()
-        $.ajax({
-            type: "POST",
-            url: "/create_theme/",
-            data: submitForm,
-            success: function () {
-                window.location.href = "/create_theme/";
-            },
-            error: function (response) {
-                error_notification(response.responseJSON);
-            }
-        });
-    });
 });
