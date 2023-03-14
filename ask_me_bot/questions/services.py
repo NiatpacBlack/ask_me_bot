@@ -290,7 +290,10 @@ def update_question_in_database(
 
 def update_theme_in_database(data: dict[str, str], theme_id: str) -> None:
     """Updates the theme data with theme_id in the database."""
-    query = f"""UPDATE themes SET theme_name = '{data['theme_name']}' WHERE theme_id = {theme_id};"""
+    query = f"""UPDATE themes SET(theme_name, modification_date)=(
+            '{data['theme_name']}', '{datetime.now(pytz.timezone(TIME_ZONE))}'
+        ) WHERE theme_id = {theme_id};
+    """
     postgres_client.cursor.execute(query)
     postgres_client.db_connect.commit()
 
