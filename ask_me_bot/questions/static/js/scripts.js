@@ -25,9 +25,10 @@ function error_notification(data) {
 }
 
 
-function actionQuestion(obj, action) {
+function actionVisibility(obj, action) {
     let cardBody = $(obj).closest(".card"),
         allTextAreas = cardBody.find('textarea'),
+        allInputs = cardBody.find('input'),
         allSelects = cardBody.find('select'),
         allButtons = cardBody.find('button');
 
@@ -45,12 +46,18 @@ function actionQuestion(obj, action) {
         for (let i = 0; i < allTextAreas.length; i++) {
             allTextAreas[i].removeAttribute('disabled');
         }
+        for (let i = 0; i < allInputs.length; i++) {
+            allInputs[i].removeAttribute('disabled');
+        }
     } else if (action === 'cancel') {
         for (let i = 0; i < allSelects.length; i++) {
             allSelects[i].setAttribute('disabled', true);
         }
         for (let i = 0; i < allTextAreas.length; i++) {
             allTextAreas[i].setAttribute('disabled', true);
+        }
+        for (let i = 0; i < allInputs.length; i++) {
+            allInputs[i].setAttribute('disabled', true);
         }
     }
 }
@@ -113,6 +120,20 @@ $(document).ready(function () {
         $.ajax({
             type: "GET",
             url: `/question/${question_id}/`,
+            success: function (html_data) {
+                mainCard.html(html_data);
+            },
+            error: function (response) {
+                error_notification(response.responseJSON);
+            }
+        });
+    });
+
+    themesTable.on('click', 'tbody tr', function () {
+        let theme_id = $(this).attr('theme-id');
+        $.ajax({
+            type: "GET",
+            url: `/theme/${theme_id}/`,
             success: function (html_data) {
                 mainCard.html(html_data);
             },

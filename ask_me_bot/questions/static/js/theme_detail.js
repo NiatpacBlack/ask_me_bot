@@ -1,17 +1,12 @@
 $(document).ready(function () {
-    $("#editQuestionForm").submit(function (e) {
+    $("#editThemeForm").submit(function (e) {
         e.preventDefault();
         let submitForm = $(this).serializeArray(),
-            question_id = $(this).attr('question-id'),
-            incorrect_answers_id = $(this).attr('incorrect-answers-id'),
-            correct_answer_id = $(this).attr('correct-answer-id');
-
-        submitForm.push({"name": "incorrect_answers_id", "value": incorrect_answers_id})
-        submitForm.push({"name": "correct_answers_id", "value": correct_answer_id})
+            theme_id = $(this).attr('theme-id');
 
         $.ajax({
             type: "PUT",
-            url: `/question/${question_id}/`,
+            url: `/theme/${theme_id}/`,
             data: submitForm,
             success: function () {
                 success_notification("Data successfully changed in the database");
@@ -23,26 +18,26 @@ $(document).ready(function () {
     });
 
 
-    $("#editQuestionButton").click(function () {
+    $("#editThemeButton").click(function () {
         actionVisibility(this, 'edit');
     });
 
 
-    $("#cancelQuestionButton").click(function () {
+    $("#cancelThemeButton").click(function () {
         actionVisibility(this, 'cancel');
     });
 
-    $("#deleteQuestionButton").click(function () {
-        let question_id = $(this).attr('question-id');
+    $("#deleteThemeButton").click(function () {
+        let theme_id = $(this).attr('theme-id');
 
         $.confirm({
-            title: 'Удалить вопрос',
-            content: 'Вы уверены, что хотите удалить этот вопрос?',
+            title: 'Удалить тему',
+            content: 'Если вы удалите тему, вместе с ней удалятся и вопросы к этой теме. Вы уверены, что хотите удалить эту тему?',
             buttons: {
                 confirm: function () {
                     $.ajax({
                         type: "DELETE",
-                        url: `/question/${question_id}/`,
+                        url: `/theme/${theme_id}/`,
                         success: function () {
                             getAdminPanel();
                         },

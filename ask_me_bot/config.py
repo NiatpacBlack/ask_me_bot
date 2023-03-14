@@ -1,3 +1,4 @@
+"""This file stores all project settings and static variables."""
 import os
 from dotenv import load_dotenv
 

@@ -1,3 +1,4 @@
+"""This file contains all the view functions for the admin panel."""
 from http import HTTPStatus
 
 from flask import render_template, request
@@ -10,7 +11,7 @@ from ask_me_bot.questions.services import insert_data_with_questions_to_database
     get_all_questions_with_theme_name_from_db, get_question_with_theme_name, get_answers_for_question, \
     parse_request_data_to_question_format, update_question_in_database, delete_question_from_database, \
     parse_request_data_to_theme_format, insert_data_with_theme_to_database, get_all_themes_from_db, \
-    get_themes_for_choices
+    get_themes_for_choices, get_theme_from_db, update_theme_in_database, delete_theme_from_database
 
 
 class CreateQuestionView(MethodView):
@@ -144,7 +145,44 @@ class CreateThemeView(MethodView):
 class ThemeView(MethodView):
 
     def get(self, theme_id: str):
-        pass
+        form = CreateThemeForm()
+
+        try:
+            theme = get_theme_from_db(theme_id)
+        except Exception as e:
+            print(e)
+            return {
+                "error": f"Failed to get theme data with id {theme_id}. Error information: {e}"
+            }, HTTPStatus.INTERNAL_SERVER_ERROR
+
+        form.theme_name.data = theme.theme_name
+        return render_template(
+            "theme_detail_page.html",
+            theme=theme,
+            form=form,
+        )
+
+    def put(self, theme_id: str):
+        request_data = request.form.to_dict()
+        try:
+            data = parse_request_data_to_theme_format(request_data)
+        except KeyError as e:
+            print(e)
+            return {
+                "error": f"Invalid data passed in the request. Error information: {e}"
+            }, HTTPStatus.BAD_REQUEST
+        update_theme_in_database(data, theme_id)
+        return {}, HTTPStatus.OK
+
+    def delete(self, theme_id: str):
+        try:
+            delete_theme_from_database(theme_id)
+        except Exception as e:
+            print(e)
+            return {
+                "error": f"Failed to delete theme number {theme_id}. Error information: {e}"
+            }, HTTPStatus.INTERNAL_SERVER_ERROR
+        return {}, HTTPStatus.OK
 
 
 class ThemesView(MethodView):

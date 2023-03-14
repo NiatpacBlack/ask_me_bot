@@ -1,3 +1,4 @@
+"""This file describes flask-wtf forms for working with the admin panel."""
 from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField, SubmitField, SelectField
 from wtforms.validators import DataRequired, Length

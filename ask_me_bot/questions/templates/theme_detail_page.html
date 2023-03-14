@@ -1,23 +1,23 @@
 {% block scripts %}
-    <script src="{{ url_for('static', filename='js/question_detail.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/theme_detail.js') }}" defer></script>
 {% endblock %}
 <div class="card-header d-flex justify-content-between">
-    <h2 class="mt-3 px-5">Вопрос {{ question.question_id }}</h2>
+    <h2 class="mt-3 px-5">Тема {{ theme.theme_name }}</h2>
     <div>
         <button onclick="getAdminPanel()" class="btn-lg btn-info text-white">
             Назад
         </button>
-        <button id="editQuestionButton" class="btn-lg btn-warning my-2 text-white" style="display: inline">
+        <button id="editThemeButton" class="btn-lg btn-warning my-2 text-white" style="display: inline">
             Редактировать
         </button>
-        <button id="deleteQuestionButton" class="btn-lg btn-danger text-white" style="display: inline"
-                question-id="{{ question.question_id }}">
+        <button id="deleteThemeButton" class="btn-lg btn-danger text-white" style="display: inline"
+                theme-id="{{ theme.theme_id }}">
             Удалить
         </button>
-        <button id="cancelQuestionButton" class="btn-lg btn-danger my-2 text-white" style="display: none">
+        <button id="cancelThemeButton" class="btn-lg btn-danger my-2 text-white" style="display: none">
             Отменить
         </button>
-        <button id="saveQuestionButton" type="submit" form="editQuestionForm" class="btn-lg btn-success"
+        <button id="saveThemeButton" type="submit" form="editThemeForm" class="btn-lg btn-success"
                 style="display: none">
             Сохранить
         </button>
@@ -25,10 +25,7 @@
 </div>
 <div class="card-body">
     <div class="row">
-        <form id="editQuestionForm" question-id="{{ question.question_id }}"
-              incorrect-answers-id="{{ incorrect_answers_id }}"
-              correct-answer-id="{{ correct_answer_id }}"
-        >
+        <form id="editThemeForm" theme-id="{{ theme.theme_id }}">
             {{ form.csrf_token() }}
             {% for field in form if field.name not in ('csrf_token', 'submit') if field.data %}
                 <div class="my-3 mx-2">
