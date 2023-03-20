@@ -30,6 +30,9 @@ TEMPLATES_DIR = os.path.join(_basedir, "questions/templates")
 # Folder for static files
 STATIC_DIR = os.path.join(_basedir, "questions/static")
 
+# A timer that determines the number of seconds it takes to answer a blitz question
+BLITZ_TIMER = 15
+
 
 class FlaskConfig:
     """Description of all Flask-application configuration settings."""
