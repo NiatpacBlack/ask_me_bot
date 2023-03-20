@@ -1,46 +1,32 @@
 import time
-from datetime import datetime
 
-from telebot import TeleBot, types
+from telebot import types, TeleBot
 
+from bot_keyboards import get_start_keyboard
 from questions.services import get_question_and_answers
 from config import BOT_TOKEN
+
 
 bot = TeleBot(BOT_TOKEN)
 
 total_points_in_blitz = 0
-
-correct_user_responses = []
 all_user_responses = []
+
+BLITZ_TIMER = 15
 
 
 @bot.message_handler(commands=["start"])
 def start(message: types.Message) -> None:
     """Displays a welcome message and start menu to the user."""
-    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    btn1 = types.KeyboardButton("Викторина без времени")
-    btn2 = types.KeyboardButton("Блиц")
-    markup.add(btn1, btn2)
-    msg = bot.send_message(
+    bot.send_message(
         message.chat.id,
         text=f"Здравствуйте, {message.from_user.full_name}, выберите действие:",
-        reply_markup=markup,
+        reply_markup=get_start_keyboard(),
     )
 
 
-@bot.message_handler(content_types=["text"])
-def blic_or_without_timer(message: types.Message) -> None:
-    """Depending on the user's choice, sends him either a quiz with or without time"""
-    if message.text == "Викторина без времени":
-        quiz(message)
-    elif message.text == "Блиц":
-        quiz_with_timer(message)
-
-
-def quiz(message: types.Message) -> None:
-    """Forms from sends a quiz without time"""
-    data = get_question_and_answers()
-    msg = bot.send_poll(
+def send_quiz(data, message: types.Message, with_period=None) -> int:
+    bot.send_poll(
         message.chat.id,
         type="quiz",
         question=data.question_name,
@@ -48,72 +34,70 @@ def quiz(message: types.Message) -> None:
         correct_option_id=data.index_current_answer,
         explanation=data.explanation,
         is_anonymous=False,
+        open_period=with_period,
     )
-    bot.register_next_step_handler(msg, blic_or_without_timer)
+    return data.index_current_answer
 
 
-def quiz_with_timer(message: types.Message) -> None:
-    """Forms and sends a quiz with a timer"""
+@bot.message_handler(func=lambda m: m.text == "Получить задачу")
+def send_question(message: types.Message) -> None:
+    """Sends the user a quiz with a question."""
+    send_quiz(get_question_and_answers(), message)
+
+
+@bot.message_handler(func=lambda m: m.text == "Блиц")
+def send_blitz_question(message: types.Message) -> None:
+    """Starts a user poll blitz. Sends the user questions for the time before the first error."""
     global total_points_in_blitz
-    total_points_in_blitz += 1
-    data = get_question_and_answers()
-    msg = bot.send_poll(
-        message.chat.id,
-        type="quiz",
-        question=data.question_name,
-        options=data.answers,
-        correct_option_id=data.index_current_answer,
-        explanation=data.explanation,
-        open_period=5,
-        is_anonymous=False,
-    )
-    time_send = datetime.now().second
-    time_end = time_send + 4.5
-    while True:
-        if total_responses(len(all_user_responses)) != total_points_in_blitz and time_send < time_end:
-            time_send += 1
-            time.sleep(1)
-        elif time_send < time_end:
-            while True:
-                if all_user_responses != [] and all_user_responses[-1] == data.index_current_answer:
-                    correct_user_responses.append(all_user_responses[-1])
-                    quiz_with_timer(message)
-                else:
-                    bot.send_message(
-                        message.chat.id,
-                        text=f"В этот раз у тебя {len(correct_user_responses)} "
-                             f"правильных ответов подряд! \nЗнай, ты всегда можешь испытать себя снова!",
-                    )
-                    correct_user_responses.clear()
-                    all_user_responses.clear()
-                    total_points_in_blitz = 0
-                    bot.register_next_step_handler(msg, blic_or_without_timer)
-                break
-            break
+
+    index_current_answer = send_quiz(get_question_and_answers(), message, with_period=BLITZ_TIMER)
+
+    time_start = 0
+
+    while time_start < BLITZ_TIMER:
+        if len(all_user_responses) == total_points_in_blitz + 1:
+            if all_user_responses[-1] == index_current_answer:
+                total_points_in_blitz += 1
+                index_current_answer = send_quiz(get_question_and_answers(), message, with_period=BLITZ_TIMER)
+                time_start = 0
+            else:
+                _send_blitz_over_message(message.chat.id)
+                _clear_global_variables()
+                return None
         else:
-            bot.send_message(
-                message.chat.id,
-                text=f"Старайся успевать отвечать до того, как кончится время.\n "
-                     f"У тебя {len(correct_user_responses)} правильных ответов из {total_points_in_blitz}"
-            )
-            correct_user_responses.clear()
-            all_user_responses.clear()
-            total_points_in_blitz = 0
-            bot.register_next_step_handler(msg, blic_or_without_timer)
-            break
+            time_start += 1
+            time.sleep(1)
 
-
-def total_responses(*args):
-    """Used in quiz_with_timer to update the quiz response counter"""
-    total = len(all_user_responses)
-    return total
+    _send_blitz_timeout_message(message.chat.id)
+    _clear_global_variables()
 
 
 @bot.poll_answer_handler()
 def handle_poll_answer(poll_answer) -> None:
     """Handler for handling survey responses"""
     all_user_responses.append(int(poll_answer.option_ids[0]))
-    pass
+
+
+def _send_blitz_over_message(chat_id: int) -> None:
+    bot.send_message(
+        chat_id,
+        text=f"В этот раз у тебя {total_points_in_blitz} "
+             f"правильных ответов подряд! \nЗнай, ты всегда можешь испытать себя снова!",
+    )
+
+
+def _send_blitz_timeout_message(chat_id: int) -> None:
+    bot.send_message(
+        chat_id,
+        text=f"Старайся успевать отвечать до того, как кончится время.\n "
+             f"У тебя {total_points_in_blitz} правильных ответов из {total_points_in_blitz + 1}"
+    )
+
+
+def _clear_global_variables() -> None:
+    global total_points_in_blitz
+    all_user_responses.clear()
+    total_points_in_blitz = 0
 
 
 if __name__ == "__main__":
