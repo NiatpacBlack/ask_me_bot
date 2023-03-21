@@ -4,11 +4,11 @@ from loguru import logger
 
 from telebot import types, TeleBot
 from telebot.apihelper import ApiException
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-from bot_keyboards import get_start_keyboard
+from bot_keyboards import get_start_keyboard, inline_for_question
 from questions.services import get_question_and_answers
 from config import BOT_TOKEN, BLITZ_TIMER
-
 
 bot = TeleBot(BOT_TOKEN)
 
@@ -25,6 +25,34 @@ def start(message: types.Message) -> None:
             text=f"Здравствуйте, {message.from_user.full_name}, выберите действие:",
             reply_markup=get_start_keyboard(),
         )
+    except ApiException:
+        logger.error(traceback.format_exc())
+
+
+def just_question(data, message: types.Message) -> str:
+    """Question with no answer options"""
+    try:
+        bot.send_message(
+            message.chat.id,
+            data.question_name, reply_markup=inline_for_question(data))
+    except ApiException:
+        logger.error(traceback.format_exc())
+
+    return data
+
+
+@bot.callback_query_handler(func=lambda call: True)
+def callback_inline(call):
+    """Inline buttons handler"""
+    if call.data == call.data:
+        bot.send_message(call.message.chat.id, text=call.data)
+
+
+@bot.message_handler(func=lambda m: m.text == "Вопрос без вариантов")
+def send_question(message: types.Message) -> None:
+    """Sends question with no answer options"""
+    try:
+        just_question(get_question_and_answers(), message)
     except ApiException:
         logger.error(traceback.format_exc())
 
