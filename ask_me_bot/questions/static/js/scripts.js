@@ -156,4 +156,16 @@ $(document).ready(function () {
         });
     });
 
+    $("#exportFromDatabaseButton").on('click', function (e) {
+        $.ajax({
+            type: "GET",
+            url: "/export/",
+            success: function () {
+                success_notification("Data successfully exported from the database");
+            },
+            error: function (response) {
+                error_notification(response.responseJSON);
+            }
+        });
+    });
 });

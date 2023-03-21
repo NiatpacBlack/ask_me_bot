@@ -1,4 +1,5 @@
 """This file contains the business logic of the question's module."""
+import json
 from datetime import datetime
 from random import choice, shuffle
 from typing import Any
@@ -11,6 +12,45 @@ from ask_me_bot.questions.dataclasses import Question, Theme, QuestionWithThemeN
     QuestionForDatabase, QuestionForQuiz
 from ask_me_bot.questions.exceptions import GetQuestionWithThemeNameError, GetAnswersForQuestionError
 from ask_me_bot.questions.models import postgres_client
+
+
+def get_question_data_from_database():
+    """Gets data about questions, answers, and topics for a question."""
+    query = f"""
+            select themes.theme_name, questions.question_name, questions.explanation,
+            correct_anwers_table.answer_name as correct_answer, 
+            array_agg(answers.answer_name) as incorrect_answers
+            from questions join themes using(theme_id) join answers using(question_id) 
+            join (select question_id, answer_name from questions join answers using(question_id) where is_right = true) 
+            as correct_anwers_table using(question_id)
+            where is_right = false
+            group by theme_name, question_name, explanation, correct_answer; 
+            """
+    postgres_client.cursor.execute(query)
+    questions_data = postgres_client.cursor.fetchall()
+    return questions_data
+
+
+def parse_questions_data_to_json(questions_data: list[tuple[Any, ...]]):
+    """Gets raw question data from the database and returns a json dictionary formatted to be written to a json file."""
+    result_dict = {"data": []}
+
+    for question in questions_data:
+        incorrect_answers_dict = {}
+
+        for index, answer in enumerate(question[4], 1):
+            incorrect_answers_dict[str(index)] = answer
+
+        result_dict['data'].append(
+            {
+                "theme": question[0],
+                "question": question[1],
+                "explanation": question[2],
+                "correct_answer": question[3],
+                "incorrect_answers": incorrect_answers_dict,
+            }
+        )
+    return json.dumps(result_dict)
 
 
 def get_themes_for_choices() -> list[tuple[str, str]]:
@@ -310,5 +350,7 @@ def delete_theme_from_database(theme_id: str) -> None:
 
 if __name__ == '__main__':
     from ask_me_bot.questions.converter import parse_data_from_json
-    test_data = parse_data_from_json(path_to_file='export/questions.json')
+
+
+    test_data = parse_data_from_json(path_to_file='import/questions.json')
     insert_data_with_questions_to_database(test_data)

@@ -1,5 +1,6 @@
 """This file describes the functionality of parsing and adding data to json file."""
 import json
+from datetime import datetime
 
 from ask_me_bot.config import EXPORT_PATH
 from ask_me_bot.questions.exceptions import JsonIncorrectData
@@ -7,14 +8,12 @@ from ask_me_bot.questions.services import QuestionForDatabase, get_theme_id_from
     insert_data_with_theme_to_database
 
 
-def add_data_to_json_file(new_data: dict[str, str, str, str, dict[str, str]]) -> None:
+def add_data_to_json_file(data: dict[str, str, str, str, dict[str, str]]) -> None:
     """Appends the passed data to the json file."""
-    with open(EXPORT_PATH, mode='r+', encoding='utf-8') as file:
-        data = json.load(file)
-        if data.get('data', False):
-            data["data"].append(new_data)
-        else:
-            data["data"] = {}
+
+    filename = f"questions_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.json"
+
+    with open(EXPORT_PATH + filename, mode='w', encoding='utf-8') as file:
         json.dump(data, file)
 
 

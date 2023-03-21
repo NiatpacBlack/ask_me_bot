@@ -4,14 +4,15 @@ from http import HTTPStatus
 from flask import render_template, request
 from flask.views import MethodView
 
-from ask_me_bot.config import EXPORT_PATH
-from ask_me_bot.questions.converter import parse_data_from_json
+from ask_me_bot.config import EXPORT_PATH, IMPORT_PATH
+from ask_me_bot.questions.converter import parse_data_from_json, add_data_to_json_file
 from ask_me_bot.questions.forms import CreateQuestionForm, CreateThemeForm
 from ask_me_bot.questions.services import insert_data_with_questions_to_database, \
     get_all_questions_with_theme_name_from_db, get_question_with_theme_name, get_answers_for_question, \
     parse_request_data_to_question_format, update_question_in_database, delete_question_from_database, \
     parse_request_data_to_theme_format, insert_data_with_theme_to_database, get_all_themes_from_db, \
-    get_themes_for_choices, get_theme_from_db, update_theme_in_database, delete_theme_from_database
+    get_themes_for_choices, get_theme_from_db, update_theme_in_database, delete_theme_from_database, \
+    get_question_data_from_database, parse_questions_data_to_json
 
 
 class CreateQuestionView(MethodView):
@@ -43,12 +44,28 @@ class ImportDataToDbView(MethodView):
 
     def get(self):
         try:
-            data = parse_data_from_json(path_to_file=EXPORT_PATH)
+            data = parse_data_from_json(path_to_file=IMPORT_PATH)
             insert_data_with_questions_to_database(data)
         except Exception as e:
             print(e)
             return {
                 "error": f"The data has not been loaded into the database. Error information: {e}"
+            }, HTTPStatus.INTERNAL_SERVER_ERROR
+        return {}, HTTPStatus.OK
+
+
+class ExportDataFromDbView(MethodView):
+    """Export data from database to json file."""
+
+    def get(self):
+        try:
+            questions_data = get_question_data_from_database()
+            questions_json_data = parse_questions_data_to_json(questions_data)
+            add_data_to_json_file(questions_json_data)
+        except Exception as e:
+            print(e)
+            return {
+                "error": f"The data has not been loaded into a json file. Error information: {e}"
             }, HTTPStatus.INTERNAL_SERVER_ERROR
         return {}, HTTPStatus.OK
 
