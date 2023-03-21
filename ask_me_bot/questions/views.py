@@ -18,13 +18,15 @@ class CreateQuestionView(MethodView):
     """Page with a form for creating a question for a quiz."""
 
     def get(self):
+        form = CreateQuestionForm()
+        form.theme_id.choices = get_themes_for_choices()
+
         return render_template(
             "create_question_page.html",
-            form=CreateQuestionForm(),
+            form=form,
         )
 
     def post(self):
-        print(request.form.to_dict())
         try:
             data = parse_request_data_to_question_format(request.form.to_dict())
         except KeyError as e:
