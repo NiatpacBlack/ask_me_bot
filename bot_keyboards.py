@@ -1,18 +1,18 @@
 from telebot import types
-from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup
 
 
-def get_start_keyboard():
+def get_start_keyboard() -> ReplyKeyboardMarkup:
     """Returns the buttons that drop down at the start of the bot."""
 
-    keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
     keyboard.add(types.KeyboardButton(text="Вопрос без вариантов"))
     keyboard.add(types.KeyboardButton(text="Получить задачу"))
     keyboard.add(types.KeyboardButton(text="Блиц"))
     return keyboard
 
 
-def inline_for_question(data):
+def inline_for_question(question_id: str) -> InlineKeyboardMarkup:
     markup = InlineKeyboardMarkup()
-    markup.add(InlineKeyboardButton(text="Объяснение", callback_data=data.explanation))
+    markup.add(InlineKeyboardButton(text="Объяснение", callback_data=f"just_question{question_id}"))
     return markup

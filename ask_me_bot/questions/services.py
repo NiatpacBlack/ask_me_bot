@@ -348,9 +348,15 @@ def delete_theme_from_database(theme_id: str) -> None:
     postgres_client.delete_value_in_table('themes', f'theme_id = {int(theme_id)}')
 
 
+def get_explanation_from_question(question_id: str) -> str | None:
+    """Returns the explanation from question from the database."""
+    query = f"""select explanation from questions where question_id = {question_id}"""
+    postgres_client.cursor.execute(query)
+    explanation_data = postgres_client.cursor.fetchone()
+    return explanation_data[0] if explanation_data else None
+
+
 if __name__ == '__main__':
     from ask_me_bot.questions.converter import parse_data_from_json
-
-
     test_data = parse_data_from_json(path_to_file='import/questions.json')
     insert_data_with_questions_to_database(test_data)

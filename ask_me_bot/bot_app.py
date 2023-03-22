@@ -1,3 +1,4 @@
+import re
 import time
 import traceback
 from loguru import logger
@@ -7,7 +8,8 @@ from telebot.apihelper import ApiException
 from telebot.types import ReplyKeyboardRemove
 
 from bot_keyboards import get_start_keyboard, inline_for_question
-from questions.services import get_question_and_answers
+from questions.services import get_question_and_answers, get_question_id_from_question_name, \
+    get_explanation_from_question
 from config import BOT_TOKEN, BLITZ_TIMER
 
 bot = TeleBot(BOT_TOKEN)
@@ -32,17 +34,20 @@ def start(message: types.Message) -> None:
 def just_question(data, message: types.Message) -> None:
     """Question with no answer options"""
     try:
+        question_id = get_question_id_from_question_name(data.question_name)
         bot.send_message(
-            message.chat.id, data.question_name, reply_markup=inline_for_question(data)
+            message.chat.id, data.question_name, reply_markup=inline_for_question(str(question_id))
         )
     except ApiException:
         logger.error(traceback.format_exc())
 
 
-@bot.callback_query_handler(func=lambda call: True)
+@bot.callback_query_handler(func=lambda call: re.match(r'just_question', call.data))
 def callback_inline(call):
     try:
-        bot.send_message(call.message.chat.id, text=call.data)
+        question_id = call.data.replace('just_question', '')
+        explanation = get_explanation_from_question(question_id)
+        bot.send_message(call.message.chat.id, text=explanation)
     except ApiException:
         logger.error(traceback.format_exc())
 
