@@ -45,5 +45,4 @@ class FlaskConfig:
 
 
 # The name of groups that store topics for a certain type of question in the telegram bot
-QUIZ_GROUP_NAME = 'Quiz'
 JUST_QUESTION_GROUP_NAME = 'Just Question'
