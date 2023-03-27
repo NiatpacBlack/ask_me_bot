@@ -33,16 +33,6 @@ def start(message: types.Message) -> None:
         logger.error(traceback.format_exc())
 
 
-@bot.callback_query_handler(func=lambda call: re.match(r'just_question', call.data))
-def callback_inline(call):
-    try:
-        question_id = call.data.replace('just_question', '')
-        explanation = get_explanation_from_question(question_id)
-        bot.send_message(call.message.chat.id, text=explanation)
-    except ApiException:
-        logger.error(traceback.format_exc())
-
-
 @bot.message_handler(func=lambda m: m.text == "Вопрос без вариантов")
 def send_question(message: types.Message) -> None:
     """Sends question with no answer options"""
@@ -50,26 +40,6 @@ def send_question(message: types.Message) -> None:
         _send_just_question(get_random_question_from_questions(get_all_questions_from_db(by='just_question')), message)
     except ApiException:
         logger.error(traceback.format_exc())
-
-
-def send_quiz(data, message: types.Message, with_period=None, reply_markup=None) -> int:
-    """Send a quiz to a user with a question."""
-    try:
-        bot.send_poll(
-            message.chat.id,
-            type="quiz",
-            question=data.question_name,
-            options=data.answers,
-            correct_option_id=data.index_current_answer,
-            explanation=data.explanation,
-            is_anonymous=False,
-            open_period=with_period,
-            reply_markup=reply_markup,
-        )
-    except ApiException:
-        logger.error(traceback.format_exc())
-
-    return data.index_current_answer
 
 
 @bot.message_handler(func=lambda m: m.text == "Получить задачу")
@@ -123,10 +93,40 @@ def send_blitz_question(message: types.Message) -> None:
         logger.error(traceback.format_exc())
 
 
+@bot.callback_query_handler(func=lambda call: re.match(r'just_question', call.data))
+def callback_inline(call):
+    try:
+        question_id = call.data.replace('just_question', '')
+        explanation = get_explanation_from_question(question_id)
+        bot.send_message(call.message.chat.id, text=explanation)
+    except ApiException:
+        logger.error(traceback.format_exc())
+
+
 @bot.poll_answer_handler()
 def handle_poll_answer(poll_answer) -> None:
     """Handler for handling survey responses."""
     all_user_responses.append(int(poll_answer.option_ids[0]))
+
+
+def send_quiz(data, message: types.Message, with_period=None, reply_markup=None) -> int:
+    """Send a quiz to a user with a question."""
+    try:
+        bot.send_poll(
+            message.chat.id,
+            type="quiz",
+            question=data.question_name,
+            options=data.answers,
+            correct_option_id=data.index_current_answer,
+            explanation=data.explanation,
+            is_anonymous=False,
+            open_period=with_period,
+            reply_markup=reply_markup,
+        )
+    except ApiException:
+        logger.error(traceback.format_exc())
+
+    return data.index_current_answer
 
 
 def _send_just_question(data: Question, message: types.Message) -> None:

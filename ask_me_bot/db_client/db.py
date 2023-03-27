@@ -17,6 +17,10 @@ class PostgresClient:
         )
         self.cursor = self.db_connect.cursor()
 
+    def __del__(self):
+        self.cursor.close()
+        self.db_connect.close()
+
     def select_all_tables_name_from_db(self) -> list[tuple[str, ...]] | list[None]:
         """Returns a list of tuples containing the names of all tables in the database."""
         self.cursor.execute(
@@ -78,11 +82,11 @@ class PostgresClient:
         self.db_connect.commit()
 
     def update_table_where(
-        self,
-        table_name: str,
-        set_column: str,
-        set_column_value: str,
-        where_pattern: str,
+            self,
+            table_name: str,
+            set_column: str,
+            set_column_value: str,
+            where_pattern: str,
     ) -> None:
         """
         Updates the column passed to set_column with the data passed to set_column_value,
