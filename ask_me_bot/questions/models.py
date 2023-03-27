@@ -11,6 +11,18 @@ postgres_client = PostgresClient(
 )
 
 
+def create_groups_table() -> None:
+    """Creates a topic group table that contains the name of the group."""
+
+    postgres_client.create_table(
+        "groups",
+        """
+        group_id SERIAL PRIMARY KEY, 
+        group_name VARCHAR(255) NOT NULL
+        """
+    )
+
+
 def create_themes_table() -> None:
     """Creates the themes table, which will contain the names of the topics for questions."""
 
@@ -21,6 +33,19 @@ def create_themes_table() -> None:
         theme_name VARCHAR(255) NOT NULL,
         creation_date timestamp with time zone NOT NULL,
         modification_date timestamp with time zone NULL
+        """
+    )
+
+
+def create_themes_groups_table() -> None:
+    """Создает "many to many" таблицу для связи групп с темами."""
+
+    postgres_client.create_table(
+        "themes_groups",
+        """
+        group_id INTEGER REFERENCES groups (group_id),
+        theme_id INTEGER REFERENCES themes (theme_id),
+        PRIMARY KEY (group_id, theme_id)
         """
     )
 
@@ -66,7 +91,9 @@ def create_answers_table() -> None:
 
 def create_all_tables_for_db() -> None:
     """Create all tables for the database."""
+    create_groups_table()
     create_themes_table()
+    create_themes_groups_table()
     create_questions_table()
     create_answers_table()
 

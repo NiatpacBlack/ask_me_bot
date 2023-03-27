@@ -149,6 +149,9 @@ $(document).ready(function () {
             url: "/import/",
             success: function () {
                 success_notification("Data successfully added to the database");
+                setTimeout(function() {
+                  location.reload();
+                }, 1000);
             },
             error: function (response) {
                 error_notification(response.responseJSON);

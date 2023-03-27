@@ -42,3 +42,8 @@ class FlaskConfig:
     DEBUG = True
     # The secret key is set either in an environment variable or directly.
     SECRET_KEY = os.getenv("FLASK_SECRET_KEY") or "any_key"
+
+
+# The name of groups that store topics for a certain type of question in the telegram bot
+QUIZ_GROUP_NAME = 'Quiz'
+JUST_QUESTION_GROUP_NAME = 'Just Question'
