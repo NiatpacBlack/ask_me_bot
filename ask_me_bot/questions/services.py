@@ -2,12 +2,12 @@
 import json
 from datetime import datetime
 from random import choice, shuffle
-from typing import Any
+from typing import Any, Literal
 
 import pytz
 
 from ask_me_bot.questions.validators import validate_theme_data, validate_question_data
-from ask_me_bot.config import TIME_ZONE
+from ask_me_bot.config import TIME_ZONE, QUIZ_GROUP_NAME, JUST_QUESTION_GROUP_NAME
 from ask_me_bot.questions.dataclasses import Question, Theme, QuestionWithThemeName, Answer, AnswersForQuestion, \
     QuestionForDatabase, QuestionForQuiz
 from ask_me_bot.questions.exceptions import GetQuestionWithThemeNameError, GetAnswersForQuestionError
@@ -68,9 +68,16 @@ def get_theme_from_db(theme_id: str) -> Theme:
     return Theme(*theme_name)
 
 
-def get_all_questions_from_db() -> list[Question, ...]:
+def get_all_questions_from_db(by: Literal['quiz', 'just_question'] = None) -> list[Question, ...]:
     """Returns all questions from the database."""
-    questions = postgres_client.select_all_from_table('questions')
+    questions = []
+    if by == 'just_question':
+        questions = _get_questions_by_group(JUST_QUESTION_GROUP_NAME)
+    elif by == 'quiz':
+        questions = _get_questions_by_group(QUIZ_GROUP_NAME)
+
+    if not questions:
+        questions = postgres_client.select_all_from_table('questions')
     return [Question(*question) for question in questions]
 
 
@@ -188,7 +195,7 @@ def get_question_and_answers() -> QuestionForQuiz:
     shuffles the answers, and returns a tuple with the received data.
     """
 
-    question = get_random_question_from_questions(get_all_questions_from_db())
+    question = get_random_question_from_questions(get_all_questions_from_db(by='quiz'))
     answers = get_sorted_answers_from_question(question)
     correct_answer = answers[0]
 
@@ -354,6 +361,17 @@ def get_explanation_from_question(question_id: str) -> str | None:
     postgres_client.cursor.execute(query)
     explanation_data = postgres_client.cursor.fetchone()
     return explanation_data[0] if explanation_data else None
+
+
+def _get_questions_by_group(group_name: str) -> list[tuple[str, ...]]:
+    query = f"""
+            select question_id, theme_id, question_name, explanation, creation_date, modification_date
+            from questions join themes_groups using(theme_id) 
+            join groups using(group_id) where group_name = '{group_name}';
+        """
+    postgres_client.cursor.execute(query)
+    questions = postgres_client.cursor.fetchall()
+    return questions
 
 
 if __name__ == '__main__':
