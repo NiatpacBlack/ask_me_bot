@@ -7,7 +7,8 @@ $(document).ready(function () {
             url: "/question/create/",
             data: submitForm,
             success: function () {
-                getAdminPanel();
+                success_notification('Question created successfully')
+                createQuestion();
             },
             error: function (response) {
                 error_notification(response.responseJSON);

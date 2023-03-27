@@ -111,7 +111,9 @@ function createTheme() {
 
 $(document).ready(function () {
 
-    let questionsTable = $('#questionsTable').DataTable(),
+    let questionsTable = $('#questionsTable').DataTable({
+            order: [[3, 'desc']],
+        }),
         themesTable = $('#themesTable').DataTable(),
         mainCard = $('#mainCard');
 
