@@ -33,7 +33,7 @@ def start(message: types.Message) -> None:
         logger.error(traceback.format_exc())
 
 
-@bot.message_handler(func=lambda m: m.text == "Вопрос без вариантов")
+@bot.message_handler(func=lambda m: m.text == "Простой вопрос")
 def send_question(message: types.Message) -> None:
     """Sends question with no answer options"""
     try:
@@ -42,7 +42,7 @@ def send_question(message: types.Message) -> None:
         logger.error(traceback.format_exc())
 
 
-@bot.message_handler(func=lambda m: m.text == "Получить задачу")
+@bot.message_handler(func=lambda m: m.text == "Квиз вопрос")
 def send_question(message: types.Message) -> None:
     """Sends the user a quiz with a question."""
     try:

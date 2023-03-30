@@ -6,8 +6,8 @@ def get_start_keyboard() -> ReplyKeyboardMarkup:
     """Returns the buttons that drop down at the start of the bot."""
 
     keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
-    keyboard.add(types.KeyboardButton(text="Вопрос без вариантов"))
-    keyboard.add(types.KeyboardButton(text="Получить задачу"))
+    keyboard.add(types.KeyboardButton(text="Простой вопрос"))
+    keyboard.add(types.KeyboardButton(text="Квиз вопрос"))
     keyboard.add(types.KeyboardButton(text="Блиц"))
     return keyboard
 
