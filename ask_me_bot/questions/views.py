@@ -4,7 +4,7 @@ from http import HTTPStatus
 from flask import render_template, request
 from flask.views import MethodView
 
-from ask_me_bot.config import EXPORT_PATH, IMPORT_PATH
+from ask_me_bot.config import IMPORT_PATH
 from ask_me_bot.questions.converter import parse_data_from_json, add_data_to_json_file
 from ask_me_bot.questions.forms import CreateQuestionForm, CreateThemeForm
 from ask_me_bot.questions.services import insert_data_with_questions_to_database, \
@@ -102,6 +102,7 @@ class QuestionView(MethodView):
         form.theme_id.choices = get_themes_for_choices()
         form.question.data = question_with_theme_name.question_name
         form.explanation.data = question_with_theme_name.explanation
+        form.detail_explanation.data = question_with_theme_name.detail_explanation
         form.correct_answer.data = answers.correct_answer.answer_name
         for index, answer in enumerate(answers.incorrect_answers, 1):
             for el in form:

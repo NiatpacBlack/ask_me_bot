@@ -30,7 +30,7 @@
               correct-answer-id="{{ correct_answer_id }}"
         >
             {{ form.csrf_token() }}
-            {% for field in form if field.name not in ('csrf_token', 'submit') if field.data %}
+            {% for field in form if field.name not in ('csrf_token', 'submit') if field.data or field.data == '' %}
                 <div class="my-3 mx-2">
                     <div class="mb-2">{{ field.label() }}</div>
                     <div class="input-group input-group-lg">

@@ -22,6 +22,10 @@ class ExplanationLengthError(Exception):
     pass
 
 
+class DetailExplanationLengthError(Exception):
+    pass
+
+
 class AnswerLengthError(Exception):
     pass
 

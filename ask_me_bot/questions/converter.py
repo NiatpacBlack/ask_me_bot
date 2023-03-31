@@ -25,9 +25,10 @@ def parse_data_from_json(path_to_file: str) -> list[QuestionForDatabase, ...]:
       "data": [
         {
           "theme": "Python",
-          "question": "Выберите неизменяемый тип данных",
-          "explanation": "tuple - является неизменяемой структурой данных,
+          "question": "Choose an immutable data type",
+          "explanation": "tuple - is an immutable data structure",
           "correct_answer": "tuple",
+          "detail_explanation: "this is an optional parameter",
           "incorrect_answers": {
             "1": "list",
             "2": "byte arrays",
@@ -42,20 +43,21 @@ def parse_data_from_json(path_to_file: str) -> list[QuestionForDatabase, ...]:
     The json data format was created specifically for entering information without knowing about the theme id
     or other data from the database.
     """
-    with open(path_to_file) as f:
-        json_load = json.load(f)
+    with open(path_to_file, encoding='utf-8') as file:
+        json_load = json.load(file)
         data = []
-        for el in json_load['data']:
+        for question in json_load['data']:
             try:
-                theme_id = get_theme_id_from_theme_name(theme_name=el['theme'])
+                theme_id = get_theme_id_from_theme_name(theme_name=question['theme'])
                 result = QuestionForDatabase(
                     theme_id=theme_id if theme_id else insert_data_with_theme_to_database(
-                        data={'theme_name': el['theme']}
+                        data={'theme_name': question['theme']}
                     ),
-                    question=el['question'],
-                    explanation=el['explanation'],
-                    correct_answer=el['correct_answer'],
-                    incorrect_answers=[answer for answer in el['incorrect_answers'].values()],
+                    question=question['question'],
+                    explanation=question['explanation'],
+                    detail_explanation=question.get('detail_explanation', ""),
+                    correct_answer=question['correct_answer'],
+                    incorrect_answers=[answer for answer in question['incorrect_answers'].values()],
                 )
             except Exception as e:
                 raise JsonIncorrectData(

@@ -11,6 +11,7 @@ class Question:
     theme_id: int
     question_name: str
     explanation: str
+    detail_explanation: str
     creation_date: datetime
     modification_date: datetime
 
@@ -55,6 +56,7 @@ class QuestionForDatabase:
     theme_id: str
     question: str
     explanation: str
+    detail_explanation: str
     correct_answer: str
     incorrect_answers: list[str, ...]
 

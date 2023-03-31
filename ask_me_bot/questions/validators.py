@@ -1,7 +1,7 @@
 """This file contains all the logic for checking fields for correct input."""
 from ask_me_bot.questions.dataclasses import QuestionForDatabase
 from ask_me_bot.questions.exceptions import AnswerLengthError, LotIncorrectAnswersError, ExplanationLengthError, \
-    QuestionLengthError, ExistingThemeError, DataKeysError
+    QuestionLengthError, ExistingThemeError, DataKeysError, DetailExplanationLengthError
 
 
 def validate_question_data(data: QuestionForDatabase) -> None:
@@ -9,6 +9,7 @@ def validate_question_data(data: QuestionForDatabase) -> None:
     try:
         _question_validation(data.question),
         _explanation_validation(data.explanation),
+        _detail_explanation_validation(data.detail_explanation),
         _correct_answer_validation(data.correct_answer),
         _incorrect_answers_validation(data.incorrect_answers)
     except KeyError:
@@ -44,7 +45,19 @@ def _explanation_validation(explanation: str) -> None:
     if len(explanation) > 200:
         raise ExplanationLengthError(
             f"The length of the explanation should not exceed 200 characters. "
-            f"Check input received from json. Incorrect explanation: {explanation}"
+            f"Incorrect explanation: {explanation}"
+        )
+
+
+def _detail_explanation_validation(explanation: str) -> None:
+    """
+    Checking the detail_explanation:
+    Explanation must not exceed 1020 characters in length.
+    """
+    if len(explanation) > 200:
+        raise DetailExplanationLengthError(
+            f"The length of the detail explanation should not exceed 1020 characters. "
+            f"Incorrect explanation: {explanation}"
         )
 
 

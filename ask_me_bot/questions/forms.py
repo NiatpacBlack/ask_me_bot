@@ -46,9 +46,18 @@ class CreateQuestionForm(FlaskForm):
         label='',
         description="Объяснение ответа",
         render_kw={
-            'class': 'form-control shadow'
+            'class': 'form-control shadow',
+            'style': 'height: 250px;',
         },
         validators=[DataRequired(), Length(max=200)],
+    )
+    detail_explanation = TextAreaField(
+        label='',
+        description="Подробное объяснение",
+        render_kw={
+            'class': 'form-control shadow',
+        },
+        validators=[Length(max=1020)],
     )
     correct_answer = TextAreaField(
         label='',

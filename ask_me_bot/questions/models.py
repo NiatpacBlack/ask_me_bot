@@ -38,7 +38,7 @@ def create_themes_table() -> None:
 
 
 def create_themes_groups_table() -> None:
-    """Создает "many to many" таблицу для связи групп с темами."""
+    """Creates a "many to many" table to link groups to topics."""
 
     postgres_client.create_table(
         "themes_groups",
@@ -61,8 +61,9 @@ def create_questions_table() -> None:
         """
         question_id SERIAL PRIMARY KEY,
         theme_id INTEGER NOT NULL,
-        question_name TEXT NOT NULL,
-        explanation TEXT NULL,
+        question_name VARCHAR(255) NOT NULL,
+        explanation VARCHAR(200) NULL,
+        detail_explanation VARCHAR(1020) NULL,
         creation_date timestamp with time zone NOT NULL,
         modification_date timestamp with time zone NULL,
         FOREIGN KEY (theme_id) REFERENCES themes (theme_id) ON DELETE CASCADE
@@ -82,7 +83,7 @@ def create_answers_table() -> None:
         """
         answer_id SERIAL PRIMARY KEY,
         question_id INTEGER NOT NULL,
-        answer_name TEXT NOT NULL,
+        answer_name VARCHAR(100) NOT NULL,
         is_right BOOLEAN NOT NULL,
         FOREIGN KEY (question_id) REFERENCES questions (question_id) ON DELETE CASCADE
         """,

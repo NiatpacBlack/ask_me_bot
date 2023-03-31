@@ -17,14 +17,14 @@ from ask_me_bot.questions.models import postgres_client
 def get_question_data_from_database():
     """Gets data about questions, answers, and topics for a question."""
     query = f"""
-            select themes.theme_name, questions.question_name, questions.explanation,
+            select themes.theme_name, questions.question_name, questions.explanation, questions.detail_explanation,
             correct_anwers_table.answer_name as correct_answer, 
             array_agg(answers.answer_name) as incorrect_answers
             from questions join themes using(theme_id) join answers using(question_id) 
             join (select question_id, answer_name from questions join answers using(question_id) where is_right = true) 
             as correct_anwers_table using(question_id)
             where is_right = false
-            group by theme_name, question_name, explanation, correct_answer; 
+            group by theme_name, question_name, explanation, detail_explanation, correct_answer; 
             """
     postgres_client.cursor.execute(query)
     questions_data = postgres_client.cursor.fetchall()
@@ -38,7 +38,7 @@ def parse_questions_data_to_json(questions_data: list[tuple[Any, ...]]):
     for question in questions_data:
         incorrect_answers_dict = {}
 
-        for index, answer in enumerate(question[4], 1):
+        for index, answer in enumerate(question[5], 1):
             incorrect_answers_dict[str(index)] = answer
 
         result_dict['data'].append(
@@ -46,7 +46,8 @@ def parse_questions_data_to_json(questions_data: list[tuple[Any, ...]]):
                 "theme": question[0],
                 "question": question[1],
                 "explanation": question[2],
-                "correct_answer": question[3],
+                "detail_explanation": question[3],
+                "correct_answer": question[4],
                 "incorrect_answers": incorrect_answers_dict,
             }
         )
@@ -93,7 +94,7 @@ def get_all_themes_from_db() -> list[Theme, ...]:
 def get_all_questions_with_theme_name_from_db() -> list[None] | list[QuestionWithThemeName, ...]:
     """Returns all questions from the database along with the topic title."""
     postgres_client.cursor.execute("""
-        select question_id, theme_id, question_name, explanation, 
+        select question_id, theme_id, question_name, explanation, detail_explanation,
         questions.creation_date, questions.modification_date, theme_name
         from questions JOIN themes USING(theme_id);
         """)
@@ -153,6 +154,7 @@ def parse_request_data_to_question_format(request_data: dict[Any, ...]) -> Quest
         theme_id=request_data["theme_id"],
         question=request_data["question"],
         explanation=request_data["explanation"],
+        detail_explanation=request_data.get("detail_explanation", ""),
         correct_answer=request_data["correct_answer"],
         incorrect_answers=[answer for answer in dict_incorrect_answers.values()]
     )
@@ -180,15 +182,14 @@ def get_sorted_answers_from_question(question: Question) -> list[str, ...]:
 def get_question_with_theme_name(question_id: str) -> QuestionWithThemeName:
     """Gets all the data from the question table combined with the themes table to get a readable theme title."""
     query = f"""
-        select question_id, theme_id, question_name, explanation,
+        select question_id, theme_id, question_name, explanation, detail_explanation,
         questions.creation_date, questions.modification_date, theme_name
         from questions join themes using(theme_id) 
         where question_id = {question_id};
         """
     postgres_client.cursor.execute(query)
     if question := postgres_client.cursor.fetchone():
-        question = QuestionWithThemeName(*question)
-        return question
+        return QuestionWithThemeName(*question)
     raise GetQuestionWithThemeNameError("Failed to get question and question subject data.")
 
 
@@ -217,30 +218,34 @@ def get_theme_id_from_theme_name(theme_name: str) -> int | None:
     return theme_id[0] if theme_id else None
 
 
-def insert_question_in_questions_table(theme_id: str, question: str, explanation: str) -> int:
+def insert_question_in_questions_table(theme_id: str, question: str, explanation: str,
+                                       detail_explanation: str = None) -> int:
     """
     Adds a question subject, question, and answer explanation to the question table in the database.
     Returns the id of the added question.
     """
     query = f"""
-        insert into questions (theme_id, question_name, explanation, creation_date) 
-        values({theme_id}, '{question}', '{explanation}', '{datetime.now(pytz.timezone(TIME_ZONE))}') 
+        insert into questions (theme_id, question_name, explanation, detail_explanation, creation_date) 
+        values({theme_id}, '{question}', '{explanation}', '{detail_explanation}', '{datetime.now(pytz.timezone(TIME_ZONE))}') 
         RETURNING question_id;
         """
     postgres_client.cursor.execute(query)
-    question_id = postgres_client.cursor.fetchone()
+    new_question = postgres_client.cursor.fetchone()
     postgres_client.db_connect.commit()
-    return question_id[0]
+    question_id = new_question[0]
+    return question_id
 
 
-def update_question_in_questions_table(theme_id: str, question_id: str, question: str, explanation: str) -> None:
+def update_question_in_questions_table(
+        theme_id: str, question_id: str, question: str, explanation: str, detail_explanation: str
+) -> None:
     """
     Updates a question subject, question, and answer explanation to the question table in the database.
     Returns the id of the updated question.
     """
     query = f"""
-        update questions set(theme_id, question_name, explanation, modification_date)=(
-            {theme_id}, '{question}', '{explanation}', '{datetime.now(pytz.timezone(TIME_ZONE))}'
+        update questions set(theme_id, question_name, explanation, detail_explanation, modification_date)=(
+            {theme_id}, '{question}', '{explanation}', '{detail_explanation}', '{datetime.now(pytz.timezone(TIME_ZONE))}'
             )
         WHERE question_id = {question_id}     
         RETURNING question_id;
@@ -314,7 +319,12 @@ def insert_data_with_questions_to_database(data: list[QuestionForDatabase, ...])
     for question in data:
         validate_question_data(question)
         if not get_question_id_from_question_name(question_name=question.question):
-            question_id = insert_question_in_questions_table(question.theme_id, question.question, question.explanation)
+            question_id = insert_question_in_questions_table(
+                question.theme_id,
+                question.question,
+                question.explanation,
+                question.detail_explanation,
+            )
             insert_answers_for_question(question_id, question.correct_answer, question.incorrect_answers)
 
 
@@ -333,7 +343,13 @@ def update_question_in_database(
 ) -> None:
     """Updates the question and its answers in the database by changing the fields passed to data."""
     validate_question_data(data)
-    update_question_in_questions_table(data.theme_id, question_id, data.question, data.explanation)
+    update_question_in_questions_table(
+        data.theme_id,
+        question_id,
+        data.question,
+        data.explanation,
+        data.detail_explanation,
+    )
     update_answers_for_question(correct_answer_id, incorrect_answers_id, data.correct_answer,
                                 data.incorrect_answers)
 
@@ -364,6 +380,14 @@ def get_explanation_from_question(question_id: str) -> str | None:
     postgres_client.cursor.execute(query)
     explanation_data = postgres_client.cursor.fetchone()
     return explanation_data[0] if explanation_data else None
+
+
+def get_detail_explanation_from_question(question_id: str) -> str | None:
+    """Returns the detail explanation from question from the database."""
+    query = f"""select detail_explanation from questions where question_id = {question_id}"""
+    postgres_client.cursor.execute(query)
+    detail_explanation_data = postgres_client.cursor.fetchone()
+    return detail_explanation_data[0] if detail_explanation_data else None
 
 
 def get_questions_by_group(group_name: str) -> list[tuple[str, ...]]:
