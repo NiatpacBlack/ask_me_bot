@@ -1,8 +1,9 @@
 """This file describes the functionality of parsing and adding data to json file."""
 import json
+import traceback
 from datetime import datetime
 
-from ask_me_bot.config import EXPORT_PATH
+from ask_me_bot.config import EXPORT_PATH, logger
 from ask_me_bot.questions.exceptions import JsonIncorrectData
 from ask_me_bot.questions.services import QuestionForDatabase, get_theme_id_from_theme_name, \
     insert_data_with_theme_to_database
@@ -60,10 +61,11 @@ def parse_data_from_json(path_to_file: str) -> list[QuestionForDatabase, ...]:
                     incorrect_answers=[answer for answer in question['incorrect_answers'].values()],
                 )
             except Exception as e:
-                raise JsonIncorrectData(
-                    'The data passed in the json file is incorrect, check the data against the documentation format.'
-                    f'Info: {e}'
-                )
+                error_message = 'The data passed in the json file is incorrect, ' \
+                                f'check the data against the documentation format. Info: {e}'
+                logger.exception(error_message)
+                logger.error(traceback.format_exc())
+                raise JsonIncorrectData(error_message)
 
             data.append(result)
 

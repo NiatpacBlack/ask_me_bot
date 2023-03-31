@@ -1,9 +1,19 @@
 """This file stores all project settings and static variables."""
 import os
 from dotenv import load_dotenv
+from loguru import logger
 
 
 load_dotenv()
+
+# Log file settings
+logger.add(
+    "../logs/bot_logs.log",
+    format="{time} {level} {message}",
+    level="DEBUG",
+    rotation="1 day",
+    compression="zip"
+)
 
 # Variable in which the executable directory of the script is placed
 _basedir = os.path.abspath(os.path.dirname(__file__))

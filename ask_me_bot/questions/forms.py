@@ -56,8 +56,9 @@ class CreateQuestionForm(FlaskForm):
         description="Подробное объяснение",
         render_kw={
             'class': 'form-control shadow',
+            'style': 'height: 250px;',
         },
-        validators=[Length(max=1020)],
+        validators=[Length(max=1024)],
     )
     correct_answer = TextAreaField(
         label='',

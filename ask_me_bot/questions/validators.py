@@ -1,7 +1,10 @@
 """This file contains all the logic for checking fields for correct input."""
+import traceback
+
 from ask_me_bot.questions.dataclasses import QuestionForDatabase
 from ask_me_bot.questions.exceptions import AnswerLengthError, LotIncorrectAnswersError, ExplanationLengthError, \
     QuestionLengthError, ExistingThemeError, DataKeysError, DetailExplanationLengthError
+from ask_me_bot.config import logger
 
 
 def validate_question_data(data: QuestionForDatabase) -> None:
@@ -13,7 +16,10 @@ def validate_question_data(data: QuestionForDatabase) -> None:
         _correct_answer_validation(data.correct_answer),
         _incorrect_answers_validation(data.incorrect_answers)
     except KeyError:
-        raise DataKeysError("Invalid input data, you need to pass data with fields corresponding to the quiz question.")
+        error_message = "Invalid input data, you need to pass data with fields corresponding to the quiz question."
+        logger.exception(error_message)
+        logger.error(traceback.format_exc())
+        raise DataKeysError(error_message)
 
 
 def validate_theme_data(data: dict[str, str]) -> None:
@@ -22,7 +28,10 @@ def validate_theme_data(data: dict[str, str]) -> None:
         if get_theme_id_from_theme_name(theme_name=data['theme_name']):
             raise ExistingThemeError("A theme with the same name already exists.")
     except KeyError:
-        raise DataKeysError("Invalid input data, you need to pass data with fields corresponding to the theme")
+        error_message = "Invalid input data, you need to pass data with fields corresponding to the theme"
+        logger.exception(error_message)
+        logger.error(traceback.format_exc())
+        raise DataKeysError(error_message)
 
 
 def _question_validation(question: str) -> None:
@@ -31,10 +40,11 @@ def _question_validation(question: str) -> None:
     Question must not exceed 255 characters in length. Restriction of the form of a quiz in a telegram.
     """
     if len(question) > 255:
-        raise QuestionLengthError(
-            f"The length of the question should not exceed 255 characters. "
-            f"Check input received from json. Incorrect question: {question}"
-        )
+        error_message = f"The length of the question should not exceed 255 characters. " \
+                        f"Incorrect question: {question}"
+        logger.exception(error_message)
+        logger.error(traceback.format_exc())
+        raise QuestionLengthError(error_message)
 
 
 def _explanation_validation(explanation: str) -> None:
@@ -43,22 +53,24 @@ def _explanation_validation(explanation: str) -> None:
     Explanation must not exceed 200 characters in length. Restriction of the form of a quiz in a telegram.
     """
     if len(explanation) > 200:
-        raise ExplanationLengthError(
-            f"The length of the explanation should not exceed 200 characters. "
-            f"Incorrect explanation: {explanation}"
-        )
+        error_message = "The length of the explanation should not exceed 200 characters. " \
+                        f"Incorrect explanation: {explanation}"
+        logger.exception(error_message)
+        logger.error(traceback.format_exc())
+        raise ExplanationLengthError(error_message)
 
 
 def _detail_explanation_validation(explanation: str) -> None:
     """
     Checking the detail_explanation:
-    Explanation must not exceed 1020 characters in length.
+    Explanation must not exceed 1024 characters in length. Restriction of the message in a telegram.
     """
-    if len(explanation) > 200:
-        raise DetailExplanationLengthError(
-            f"The length of the detail explanation should not exceed 1020 characters. "
-            f"Incorrect explanation: {explanation}"
-        )
+    if len(explanation) > 1024:
+        error_message = "The length of the detail explanation should not exceed 4096 characters. " \
+                        f"Incorrect explanation: {explanation}"
+        logger.exception(error_message)
+        logger.error(traceback.format_exc())
+        raise DetailExplanationLengthError(error_message)
 
 
 def _correct_answer_validation(correct_answer: str) -> None:
@@ -67,10 +79,11 @@ def _correct_answer_validation(correct_answer: str) -> None:
     Answer must not exceed 100 characters in length. Restriction of the form of a quiz in a telegram.
     """
     if len(correct_answer) > 100:
-        raise AnswerLengthError(
-            f"The length of the correct answer should not exceed 100 characters. "
-            f"Check input received from json. Incorrect answer: {correct_answer}"
-        )
+        error_message = "The length of the correct answer should not exceed 100 characters. " \
+                        f"Incorrect answer: {correct_answer}"
+        logger.exception(error_message)
+        logger.error(traceback.format_exc())
+        raise AnswerLengthError(error_message)
 
 
 def _incorrect_answers_validation(incorrect_answers: list[str, ...]) -> None:
@@ -80,13 +93,15 @@ def _incorrect_answers_validation(incorrect_answers: list[str, ...]) -> None:
     Questions should not be more than 9. Restriction of the quiz form in the telegram.
     """
     if len(incorrect_answers) > 9:
-        raise LotIncorrectAnswersError(
-            f"Too many incorrect answers passed, there should not be more than 9. "
-            f"Check the data passed from json. Incorrect Answers: {incorrect_answers}"
-        )
+        error_message = "Too many incorrect answers passed, there should not be more than 9. " \
+                        f"Incorrect Answers: {incorrect_answers}"
+        logger.exception(error_message)
+        logger.error(traceback.format_exc())
+        raise LotIncorrectAnswersError(error_message)
     for answer in incorrect_answers:
         if len(answer) > 100:
-            raise AnswerLengthError(
-                f"The length of the correct answer should not exceed 100 characters. "
-                f"Check input received from json. Incorrect answer: {answer}"
-            )
+            error_message = "The length of the correct answer should not exceed 100 characters. " \
+                            f"Incorrect answer: {answer}"
+            logger.exception(error_message)
+            logger.error(traceback.format_exc())
+            raise AnswerLengthError(error_message)

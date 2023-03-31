@@ -1,10 +1,11 @@
 """This file contains all the view functions for the admin panel."""
+import traceback
 from http import HTTPStatus
 
 from flask import render_template, request
 from flask.views import MethodView
 
-from ask_me_bot.config import IMPORT_PATH
+from ask_me_bot.config import IMPORT_PATH, logger
 from ask_me_bot.questions.converter import parse_data_from_json, add_data_to_json_file
 from ask_me_bot.questions.forms import CreateQuestionForm, CreateThemeForm
 from ask_me_bot.questions.services import insert_data_with_questions_to_database, \
@@ -31,6 +32,8 @@ class CreateQuestionView(MethodView):
         try:
             data = parse_request_data_to_question_format(request.form.to_dict())
         except KeyError as e:
+            logger.exception(KeyError)
+            logger.error(traceback.format_exc())
             return {
                 "error": f"Invalid data passed in the request. Error information: {e}"
             }, HTTPStatus.BAD_REQUEST
@@ -47,7 +50,8 @@ class ImportDataToDbView(MethodView):
             data = parse_data_from_json(path_to_file=IMPORT_PATH)
             insert_data_with_questions_to_database(data)
         except Exception as e:
-            print(e)
+            logger.exception(Exception)
+            logger.error(traceback.format_exc())
             return {
                 "error": f"The data has not been loaded into the database. Error information: {e}"
             }, HTTPStatus.INTERNAL_SERVER_ERROR
@@ -63,7 +67,8 @@ class ExportDataFromDbView(MethodView):
             questions_json_data = parse_questions_data_to_json(questions_data)
             add_data_to_json_file(questions_json_data)
         except Exception as e:
-            print(e)
+            logger.exception(Exception)
+            logger.error(traceback.format_exc())
             return {
                 "error": f"The data has not been loaded into a json file. Error information: {e}"
             }, HTTPStatus.INTERNAL_SERVER_ERROR
@@ -93,7 +98,8 @@ class QuestionView(MethodView):
             question_with_theme_name = get_question_with_theme_name(question_id)
             answers = get_answers_for_question(question_id)
         except Exception as e:
-            print(e)
+            logger.exception(Exception)
+            logger.error(traceback.format_exc())
             return {
                 "error": f"Failed to get question data with id {question_id}. Error information: {e}"
             }, HTTPStatus.INTERNAL_SERVER_ERROR
@@ -125,18 +131,24 @@ class QuestionView(MethodView):
                 incorrect_answers_id = request_data["incorrect_answers_id"].split()
                 correct_answer_id = request_data["correct_answers_id"]
             except KeyError as e:
-                print(e)
+                logger.exception(KeyError)
+                logger.error(traceback.format_exc())
                 return {
                     "error": f"Invalid data passed in the request. Error information: {e}"
                 }, HTTPStatus.BAD_REQUEST
             update_question_in_database(data, question_id, correct_answer_id, incorrect_answers_id)
             return {}, HTTPStatus.OK
+        logger.exception("The data submitted in the form was not validated.")
+        return {
+            "error": "The data submitted in the form was not validated. Check the correctness of the entered data.",
+        }, HTTPStatus.BAD_REQUEST
 
     def delete(self, question_id: str):
         try:
             delete_question_from_database(question_id)
         except Exception as e:
-            print(e)
+            logger.exception(Exception)
+            logger.error(traceback.format_exc())
             return {
                 "error": f"Failed to delete question number {question_id}. Error information: {e}"
             }, HTTPStatus.INTERNAL_SERVER_ERROR
@@ -154,6 +166,8 @@ class CreateThemeView(MethodView):
         try:
             data = parse_request_data_to_theme_format(request.form.to_dict())
         except KeyError as e:
+            logger.exception(KeyError)
+            logger.error(traceback.format_exc())
             return {
                 "error": f"Invalid data passed in the request. Error information: {e}"
             }, HTTPStatus.BAD_REQUEST
@@ -170,7 +184,8 @@ class ThemeView(MethodView):
         try:
             theme = get_theme_from_db(theme_id)
         except Exception as e:
-            print(e)
+            logger.exception(Exception)
+            logger.error(traceback.format_exc())
             return {
                 "error": f"Failed to get theme data with id {theme_id}. Error information: {e}"
             }, HTTPStatus.INTERNAL_SERVER_ERROR
@@ -187,7 +202,8 @@ class ThemeView(MethodView):
         try:
             data = parse_request_data_to_theme_format(request_data)
         except KeyError as e:
-            print(e)
+            logger.exception(KeyError)
+            logger.error(traceback.format_exc())
             return {
                 "error": f"Invalid data passed in the request. Error information: {e}"
             }, HTTPStatus.BAD_REQUEST
@@ -198,14 +214,9 @@ class ThemeView(MethodView):
         try:
             delete_theme_from_database(theme_id)
         except Exception as e:
-            print(e)
+            logger.exception(Exception)
+            logger.error(traceback.format_exc())
             return {
                 "error": f"Failed to delete theme number {theme_id}. Error information: {e}"
             }, HTTPStatus.INTERNAL_SERVER_ERROR
         return {}, HTTPStatus.OK
-
-
-class ThemesView(MethodView):
-
-    def get(self):
-        pass
