@@ -21,3 +21,8 @@ Through it, you can add a new topic for questions, add and edit questions, delet
   - `DB_PASSWORD` (password of your PostgreSQL user)
   - `DB_HOST` (your PostgreSQL database host)
   - `DB_PORT` (port of your PostgreSQL database)
+* If you are running the project for the first time, you need to create tables in the database. To do this, you need to run the models.py file from the questions module.
+* After the tables have been created, run the admin panel through the admin_panel_run.py file in the project root.
+* Finally, add your question threads and questions via the admin panel.
+
+
