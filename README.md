@@ -4,7 +4,12 @@ This Telegram bot is designed to simplify the learning of programming languages,
 
 The Telegram bot can send you quiz questions that you must answer correctly. It will also provide information with an explanation of the answer.
 
+![Peek 2023-03-31 03-14](https://user-images.githubusercontent.com/84034483/228993102-3f2cb30e-c56a-4c94-bcf8-c247a35a6aca.gif)
+
+
 In case you do not want to choose an answer from multiple options, you can select a simple question that you can answer on your own and compare the answer with the correct option.
+
+![Peek 2023-03-31 03-21](https://user-images.githubusercontent.com/84034483/228993182-64e12f8a-9c8f-4db5-a36c-3fc1e76c67ff.gif)
 
 For convenient addition and editing of questions, the application has a web interface written in Flask, which is a kind of admin panel.
 
