@@ -7,14 +7,14 @@ from telebot.apihelper import ApiException
 from telebot.types import ReplyKeyboardRemove
 
 from ask_me_bot.questions.dataclasses import Question
-from ask_me_bot.bot_keyboards import get_start_keyboard, inline_for_just_question
+from ask_me_bot.bot_keyboards import get_start_keyboard, inline_for_just_question, get_themes_keyboard
 from questions.services import (
     get_question_and_answers,
     get_question_id_from_question_name,
     get_explanation_from_question,
     get_all_questions_from_db,
     get_random_question_from_questions,
-    get_detail_explanation_from_question,
+    get_detail_explanation_from_question, get_questions_by_theme_id,
 )
 from config import BOT_TOKEN, BLITZ_TIMER, logger
 
@@ -41,13 +41,27 @@ def start(message: types.Message) -> None:
 
 @bot.message_handler(func=lambda m: m.text == "Простой вопрос")
 def send_just_question(message: types.Message) -> None:
-    """Sends question with no answer options"""
+    """Sends question with no answer options."""
     try:
         _send_just_question(
             get_random_question_from_questions(
                 get_all_questions_from_db(by="just_question")
             ),
             message,
+        )
+    except ApiException:
+        logger.exception(ApiException)
+        logger.error(traceback.format_exc())
+
+
+@bot.message_handler(func=lambda m: m.text == "Простой вопрос по теме")
+def send_just_question_by_theme(message: types.Message) -> None:
+    """Sends question with no answer options by theme."""
+    try:
+        bot.send_message(
+            message.chat.id,
+            text=f"Выберите тему:",
+            reply_markup=get_themes_keyboard(),
         )
     except ApiException:
         logger.exception(ApiException)
@@ -133,6 +147,21 @@ def callback_inline_detail_explanation(call):
         logger.error(traceback.format_exc())
 
 
+@bot.callback_query_handler(func=lambda call: re.match(r"just_question_theme", call.data))
+def callback_inline_theme_for_just_question(call):
+    try:
+        theme_id = call.data.replace("just_question_theme", "")
+        _send_just_question(
+            get_random_question_from_questions(
+                get_questions_by_theme_id(theme_id)
+            ),
+            call.message,
+        )
+    except ApiException:
+        logger.exception(ApiException)
+        logger.error(traceback.format_exc())
+
+
 @bot.poll_answer_handler()
 def handle_poll_answer(poll_answer) -> None:
     """Handler for handling survey responses."""
@@ -180,7 +209,7 @@ def _send_blitz_over_message(chat_id: int) -> None:
         bot.send_message(
             chat_id,
             text=f"В этот раз у тебя {total_points_in_blitz} "
-            f"правильных ответов подряд! \nЗнай, ты всегда можешь испытать себя снова!",
+                 f"правильных ответов подряд! \nЗнай, ты всегда можешь испытать себя снова!",
             reply_markup=get_start_keyboard(),
         )
     except ApiException:
@@ -194,7 +223,7 @@ def _send_blitz_timeout_message(chat_id: int) -> None:
         bot.send_message(
             chat_id,
             text=f"Старайся успевать отвечать до того, как кончится время.\n "
-            f"У тебя {total_points_in_blitz} правильных ответов из {total_points_in_blitz + 1}",
+                 f"У тебя {total_points_in_blitz} правильных ответов из {total_points_in_blitz + 1}",
             reply_markup=get_start_keyboard(),
         )
     except ApiException:

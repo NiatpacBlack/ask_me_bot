@@ -80,7 +80,7 @@ def get_theme_from_db(theme_id: str) -> Theme:
 
 
 def get_all_questions_from_db(
-    by: Literal["just_question"] = None,
+        by: Literal["just_question"] = None,
 ) -> list[Question, ...]:
     """
     Returns all questions from the database.
@@ -104,7 +104,7 @@ def get_all_themes_from_db() -> list[Theme, ...]:
 
 
 def get_all_questions_with_theme_name_from_db() -> (
-    list[None] | list[QuestionWithThemeName, ...]
+        list[None] | list[QuestionWithThemeName, ...]
 ):
     """Returns all questions from the database along with the topic title."""
     postgres_client.cursor.execute(
@@ -129,7 +129,7 @@ def get_random_question_from_questions(questions: list[Question, ...]) -> Questi
 
 
 def get_incorrect_answers_for_question(
-    question_id: str,
+        question_id: str,
 ) -> list[Answer, ...] | tuple[None]:
     """Returns a list of incorrect answers for the question with question_id."""
     query = f"""select * from answers where question_id = {question_id} and is_right='false';"""
@@ -180,7 +180,7 @@ def get_answers_for_question(question_id: str) -> AnswersForQuestion:
 
 
 def parse_request_data_to_question_format(
-    request_data: dict[Any, ...]
+        request_data: dict[Any, ...]
 ) -> QuestionForDatabase:
     """Converts a dictionary of question data into a format suitable for adding the question to the database."""
     dict_incorrect_answers = {
@@ -265,7 +265,7 @@ def get_theme_id_from_theme_name(theme_name: str) -> int | None:
 
 
 def insert_question_in_questions_table(
-    theme_id: str, question: str, explanation: str, detail_explanation: str = None
+        theme_id: str, question: str, explanation: str, detail_explanation: str = None
 ) -> int:
     """
     Adds a question subject, question, and answer explanation to the question table in the database.
@@ -284,11 +284,11 @@ def insert_question_in_questions_table(
 
 
 def update_question_in_questions_table(
-    theme_id: str,
-    question_id: str,
-    question: str,
-    explanation: str,
-    detail_explanation: str,
+        theme_id: str,
+        question_id: str,
+        question: str,
+        explanation: str,
+        detail_explanation: str,
 ) -> None:
     """
     Updates a question subject, question, and answer explanation to the question table in the database.
@@ -314,7 +314,7 @@ def get_question_id_from_question_name(question_name: str) -> int | bool:
 
 
 def insert_answers_for_question(
-    question_id: int, correct_answer: str, incorrect_answers: list[str, ...]
+        question_id: int, correct_answer: str, incorrect_answers: list[str, ...]
 ) -> None:
     """
     Adds the answers to the question with question_id to the answer table in the database.
@@ -346,10 +346,10 @@ def insert_theme_in_themes_table(theme_name: str) -> str:
 
 
 def update_answers_for_question(
-    correct_answer_id: str,
-    incorrect_answers_id: list[str, ...],
-    correct_answer: str,
-    incorrect_answers: list[str, ...],
+        correct_answer_id: str,
+        incorrect_answers_id: list[str, ...],
+        correct_answer: str,
+        incorrect_answers: list[str, ...],
 ) -> None:
     """Updates the answers to the question with question_id in the answer table in the database."""
     update_correct_answer_query = f"""
@@ -368,7 +368,7 @@ def update_answers_for_question(
 
 
 def insert_data_with_questions_to_database(
-    data: list[QuestionForDatabase, ...]
+        data: list[QuestionForDatabase, ...]
 ) -> None:
     """Adds submitted data related to quiz questions to database tables."""
     for question in data:
@@ -393,10 +393,10 @@ def insert_data_with_theme_to_database(data: dict[str, str]) -> str:
 
 
 def update_question_in_database(
-    data: QuestionForDatabase,
-    question_id: str,
-    correct_answer_id: str,
-    incorrect_answers_id: list[str, ...],
+        data: QuestionForDatabase,
+        question_id: str,
+        correct_answer_id: str,
+        incorrect_answers_id: list[str, ...],
 ) -> None:
     """Updates the question and its answers in the database by changing the fields passed to data."""
     validate_question_data(data)
@@ -465,8 +465,17 @@ def get_questions_by_group(group_name: str) -> list[tuple[str, ...]]:
     return questions
 
 
+def get_questions_by_theme_id(theme_id: str) -> list[Question, ...]:
+    """Returns a list of questions related to the theme."""
+    query = f"""select * from questions where theme_id = {theme_id};"""
+    postgres_client.cursor.execute(query)
+    questions = postgres_client.cursor.fetchall()
+    return [Question(*question) for question in questions]
+
+
 if __name__ == "__main__":
     from ask_me_bot.questions.converter import parse_data_from_json
+
 
     test_data = parse_data_from_json(path_to_file="import/questions.json")
     insert_data_with_questions_to_database(test_data)

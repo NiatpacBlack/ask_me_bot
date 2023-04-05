@@ -5,7 +5,7 @@ from telebot.types import (
     ReplyKeyboardMarkup,
 )
 
-from ask_me_bot.questions.services import get_detail_explanation_from_question
+from ask_me_bot.questions.services import get_detail_explanation_from_question, get_themes_for_choices
 
 
 def get_start_keyboard() -> ReplyKeyboardMarkup:
@@ -13,6 +13,7 @@ def get_start_keyboard() -> ReplyKeyboardMarkup:
 
     keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
     keyboard.add(types.KeyboardButton(text="Простой вопрос"))
+    keyboard.add(types.KeyboardButton(text="Простой вопрос по теме"))
     keyboard.add(types.KeyboardButton(text="Квиз вопрос"))
     keyboard.add(types.KeyboardButton(text="Блиц"))
     return keyboard
@@ -30,6 +31,18 @@ def inline_for_just_question(question_id: str) -> InlineKeyboardMarkup:
             InlineKeyboardButton(
                 text="Подробное объяснение",
                 callback_data=f"detail_explanation{question_id}",
+            )
+        )
+    return markup
+
+
+def get_themes_keyboard() -> InlineKeyboardMarkup:
+    markup = InlineKeyboardMarkup()
+    themes = get_themes_for_choices()
+    for theme in themes:
+        markup.add(
+            InlineKeyboardButton(
+                text=f"{theme[1]}", callback_data=f"just_question_theme{theme[0]}"
             )
         )
     return markup
