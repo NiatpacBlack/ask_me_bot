@@ -27,7 +27,97 @@ Through it, you can add a new topic for questions, add and edit questions, delet
   - `DB_HOST` (your PostgreSQL database host)
   - `DB_PORT` (port of your PostgreSQL database)
 * If you are running the project for the first time, you need to create tables in the database. To do this, you need to run the models.py file from the questions module.
-* After the tables have been created, run the admin panel through the admin_panel_run.py file in the project root.
+* After the tables have been created, run the admin panel through the wsgi.py file in the project root.
 * Finally, add your question threads and questions via the admin panel.
+* Run the bot through the bot_app.py file in the ask_me_bot package.
+
+## Running the admin panel on the local network
+* For Unix systems - install gunicorn
+
+`pip install gunicorn`
+* To run the application, enter the command
+
+`gunicorn --bind 127.0.0.1:5000 wsgi:app`
+
+* Alternative option for Windows systems - install waitress
+
+`pip install waitress` 
+
+* To run the application, enter the command
+
+`waitress-serve --listen=127.0.0.1:5000 wsgi:app`
+
+<details>
+  <summary>
+    <b>Setting up request proxying with nginx:</b>
+  </summary>
+
+  * Install nginx on your system. For ubuntu, use the command `sudo apt install nginx`
+    
+  <details>
+    <summary>
+      If you do not have Ubuntu, but Manjaro, like me. And when installing nginx, there are no required folders.
+    </summary>
+
+     * Insall nginx:
+      
+      `sudo pacman -S nginx`
+  
+     * Create directories:
+    
+      `sudo mkdir /etc/nginx/sites-enabled`
+  
+      `sudo mkdir /etc/nginx/sites-available`
+  
+      `sudo mkdir /etc/nginx/conf.d`
+     * Edit the config, connect the sites-enabled folder:
+      
+     `sudo nano /etc/nginx/nginx.conf`
+      
+  
+     ```
+      http {
+          
+          ##
+          # Paste these lines into the http block in your config
+          ##
+      
+          include /etc/nginx/conf.d/*.conf;
+          include /etc/nginx/sites-enabled/*;
+          
+      }
+     ```
+  
+  </details>
+ 
+   * Create a config file for the application 
+    
+   `sudo nano /etc/nginx/sites-available/ask_me_bot.conf`
+
+   ```
+    server {
+        listen 80;  
+        
+        access_log /var/log/nginx/ask_me_bot.access.log;
+        error_log /var/log/nginx/ask_me_bot.error.log; 
+        
+        location / {
+            proxy_pass http://127.0.0.1:5000;
+            proxy_set_header Host $host;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        }
+    }    
+   ```
+
+   * Add a link to config to the sites-enabled folder
+    
+   `sudo ln -s /etc/nginx/sites-available/ask_me_bot.conf /etc/nginx/sites-enabled/`
+   * Restart the server
+
+   `sudo systemctl restart nginx`
+   
+  #### We can check the admin panel at 127.0.0.1 (By default, nginx runs on port 80, you can change it in the config to any free port.) 
+</details>
+
 
 
