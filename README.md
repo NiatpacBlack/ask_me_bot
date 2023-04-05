@@ -59,34 +59,34 @@ Through it, you can add a new topic for questions, add and edit questions, delet
       If you do not have Ubuntu, but Manjaro, like me. And when installing nginx, there are no required folders.
     </summary>
 
-     * Insall nginx:
-      
-      `sudo pacman -S nginx`
-  
-     * Create directories:
+   * Insall nginx:
     
-      `sudo mkdir /etc/nginx/sites-enabled`
+   `sudo pacman -S nginx`
+
+   * Create directories:
   
-      `sudo mkdir /etc/nginx/sites-available`
-  
-      `sudo mkdir /etc/nginx/conf.d`
-     * Edit the config, connect the sites-enabled folder:
-      
-     `sudo nano /etc/nginx/nginx.conf`
-      
-  
-     ```
-      http {
-          
-          ##
-          # Paste these lines into the http block in your config
-          ##
-      
-          include /etc/nginx/conf.d/*.conf;
-          include /etc/nginx/sites-enabled/*;
-          
-      }
-     ```
+   `sudo mkdir /etc/nginx/sites-enabled`
+
+   `sudo mkdir /etc/nginx/sites-available`
+
+   `sudo mkdir /etc/nginx/conf.d`
+   * Edit the config, connect the sites-enabled folder:
+    
+   `sudo nano /etc/nginx/nginx.conf`
+    
+
+   ```
+    http {
+        
+        ##
+        # Paste these lines into the http block in your config
+        ##
+    
+        include /etc/nginx/conf.d/*.conf;
+        include /etc/nginx/sites-enabled/*;
+        
+    }
+   ```
   
   </details>
  
