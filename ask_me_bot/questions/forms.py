@@ -8,142 +8,116 @@ from ask_me_bot.questions.services import get_themes_for_choices
 
 class CreateThemeForm(FlaskForm):
     theme_name = StringField(
-        label='',
-        description='Тема',
-        render_kw={
-            'class': 'form-control shadow'
-        },
+        label="",
+        description="Тема",
+        render_kw={"class": "form-control shadow"},
         validators=[DataRequired(), Length(max=100)],
     )
     submit = SubmitField(
         "Добавить тему",
         render_kw={
-            'class': 'btn-lg btn-success mt-2',
-            'form': 'addThemeForm',
+            "class": "btn-lg btn-success mt-2",
+            "form": "addThemeForm",
         },
     )
 
 
 class CreateQuestionForm(FlaskForm):
     theme_id = SelectField(
-        label='',
-        description='Тема',
-        render_kw={
-            'class': 'form-select shadow'
-        },
+        label="",
+        description="Тема",
+        render_kw={"class": "form-select shadow"},
         validators=[DataRequired()],
         choices=get_themes_for_choices(),
     )
     question = TextAreaField(
-        label='',
+        label="",
         description="Вопрос",
-        render_kw={
-            'class': 'form-control shadow'
-        },
+        render_kw={"class": "form-control shadow"},
         validators=[DataRequired(), Length(max=255)],
     )
     explanation = TextAreaField(
-        label='',
+        label="",
         description="Объяснение ответа",
         render_kw={
-            'class': 'form-control shadow',
-            'style': 'height: 250px;',
+            "class": "form-control shadow",
+            "style": "height: 250px;",
         },
         validators=[DataRequired(), Length(max=200)],
     )
     detail_explanation = TextAreaField(
-        label='',
+        label="",
         description="Подробное объяснение",
         render_kw={
-            'class': 'form-control shadow',
-            'style': 'height: 250px;',
+            "class": "form-control shadow",
+            "style": "height: 250px;",
         },
         validators=[Length(max=1024)],
     )
     correct_answer = TextAreaField(
-        label='',
+        label="",
         description="Правильный ответ",
-        render_kw={
-            'class': 'form-control shadow'
-        },
+        render_kw={"class": "form-control shadow"},
         validators=[DataRequired(), Length(max=100)],
     )
     incorrect_answer1 = TextAreaField(
-        label='',
+        label="",
         description="1 Неправильный ответ",
-        render_kw={
-            'class': 'form-control shadow'
-        },
+        render_kw={"class": "form-control shadow"},
         validators=[DataRequired(), Length(max=100)],
     )
     incorrect_answer2 = TextAreaField(
-        label='',
+        label="",
         description="2 Неправильный ответ",
-        render_kw={
-            'class': 'form-control shadow'
-        },
+        render_kw={"class": "form-control shadow"},
         validators=[Length(max=100)],
     )
     incorrect_answer3 = TextAreaField(
-        label='',
+        label="",
         description="3 Неправильный ответ",
-        render_kw={
-            'class': 'form-control shadow'
-        },
+        render_kw={"class": "form-control shadow"},
         validators=[Length(max=100)],
     )
     incorrect_answer4 = TextAreaField(
-        label='',
+        label="",
         description="4 Неправильный ответ",
-        render_kw={
-            'class': 'form-control shadow'
-        },
+        render_kw={"class": "form-control shadow"},
         validators=[Length(max=100)],
     )
     incorrect_answer5 = TextAreaField(
-        label='',
+        label="",
         description="5 Неправильный ответ",
-        render_kw={
-            'class': 'form-control shadow'
-        },
+        render_kw={"class": "form-control shadow"},
         validators=[Length(max=100)],
     )
     incorrect_answer6 = TextAreaField(
-        label='',
+        label="",
         description="6 Неправильный ответ",
-        render_kw={
-            'class': 'form-control shadow'
-        },
+        render_kw={"class": "form-control shadow"},
         validators=[Length(max=100)],
     )
     incorrect_answer7 = TextAreaField(
-        label='',
+        label="",
         description="7 Неправильный ответ",
-        render_kw={
-            'class': 'form-control shadow'
-        },
+        render_kw={"class": "form-control shadow"},
         validators=[Length(max=100)],
     )
     incorrect_answer8 = TextAreaField(
-        label='',
+        label="",
         description="8 Неправильный ответ",
-        render_kw={
-            'class': 'form-control shadow'
-        },
+        render_kw={"class": "form-control shadow"},
         validators=[Length(max=100)],
     )
     incorrect_answer9 = TextAreaField(
-        label='',
+        label="",
         description="9 Неправильный ответ",
-        render_kw={
-            'class': 'form-control shadow'
-        },
+        render_kw={"class": "form-control shadow"},
         validators=[Length(max=100)],
     )
     submit = SubmitField(
         "Добавить вопрос",
         render_kw={
-            'class': 'btn-lg btn-success mt-2',
-            'form': 'addQuestionForm',
+            "class": "btn-lg btn-success mt-2",
+            "form": "addQuestionForm",
         },
     )

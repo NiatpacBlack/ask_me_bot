@@ -1,5 +1,9 @@
 from telebot import types
-from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup
+from telebot.types import (
+    InlineKeyboardMarkup,
+    InlineKeyboardButton,
+    ReplyKeyboardMarkup,
+)
 
 from ask_me_bot.questions.services import get_detail_explanation_from_question
 
@@ -16,7 +20,16 @@ def get_start_keyboard() -> ReplyKeyboardMarkup:
 
 def inline_for_just_question(question_id: str) -> InlineKeyboardMarkup:
     markup = InlineKeyboardMarkup()
-    markup.add(InlineKeyboardButton(text="Объяснение", callback_data=f"explanation{question_id}"))
+    markup.add(
+        InlineKeyboardButton(
+            text="Объяснение", callback_data=f"explanation{question_id}"
+        )
+    )
     if get_detail_explanation_from_question(question_id):
-        markup.add(InlineKeyboardButton(text="Подробное объяснение", callback_data=f"detail_explanation{question_id}"))
+        markup.add(
+            InlineKeyboardButton(
+                text="Подробное объяснение",
+                callback_data=f"detail_explanation{question_id}",
+            )
+        )
     return markup

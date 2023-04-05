@@ -19,7 +19,7 @@ def create_groups_table() -> None:
         """
         group_id SERIAL PRIMARY KEY, 
         group_name VARCHAR(255) NOT NULL
-        """
+        """,
     )
 
 
@@ -33,7 +33,7 @@ def create_themes_table() -> None:
         theme_name VARCHAR(255) NOT NULL,
         creation_date timestamp with time zone NOT NULL,
         modification_date timestamp with time zone NULL
-        """
+        """,
     )
 
 
@@ -46,7 +46,7 @@ def create_themes_groups_table() -> None:
         group_id INTEGER REFERENCES groups (group_id),
         theme_id INTEGER REFERENCES themes (theme_id),
         PRIMARY KEY (group_id, theme_id)
-        """
+        """,
     )
 
 
@@ -99,5 +99,5 @@ def create_all_tables_for_db() -> None:
     create_answers_table()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     create_all_tables_for_db()

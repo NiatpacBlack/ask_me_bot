@@ -32,7 +32,9 @@ class PostgresClient:
 
         return self.cursor.fetchall()
 
-    def select_columns_from_table(self, table_name: str, *args: str) -> list[tuple[str, ...]]:
+    def select_columns_from_table(
+        self, table_name: str, *args: str
+    ) -> list[tuple[str, ...]]:
         """Returns data from columns passed to args from table table_name."""
         query = sql.SQL("SELECT {} FROM {}").format(
             sql.SQL(",").join(map(sql.Identifier, args)), sql.Identifier(table_name)
@@ -82,11 +84,11 @@ class PostgresClient:
         self.db_connect.commit()
 
     def update_table_where(
-            self,
-            table_name: str,
-            set_column: str,
-            set_column_value: str,
-            where_pattern: str,
+        self,
+        table_name: str,
+        set_column: str,
+        set_column_value: str,
+        where_pattern: str,
     ) -> None:
         """
         Updates the column passed to set_column with the data passed to set_column_value,

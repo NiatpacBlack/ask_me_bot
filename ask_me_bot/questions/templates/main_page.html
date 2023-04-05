@@ -14,6 +14,7 @@
                     <th class="text-center">Вопрос</th>
                     <th class="text-center">Время создания</th>
                     <th class="text-center">Время изменения</th>
+                    <th class="text-center">Наличие подробного объяснения</th>
                 </tr>
                 </thead>
                 <tbody style="cursor: pointer">
@@ -25,6 +26,13 @@
                             <td>{{ question.question_name }}</td>
                             <td>{{ question.creation_date }}</td>
                             <td>{{ question.modification_date or '-' }}</td>
+                            <td>
+                                {% if question.detail_explanation %}
+                                    Есть
+                                {% else %}
+                                    Нет
+                                {% endif %}
+                            </td>
                         </tr>
                     {% endfor %}
                 {% endif %}

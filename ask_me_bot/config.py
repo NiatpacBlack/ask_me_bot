@@ -12,7 +12,7 @@ logger.add(
     format="{time} {level} {message}",
     level="DEBUG",
     rotation="1 day",
-    compression="zip"
+    compression="zip",
 )
 
 # Variable in which the executable directory of the script is placed
@@ -29,8 +29,9 @@ DB_HOST = os.getenv("DB_HOST")
 DB_PORT = os.getenv("DB_PORT")
 
 # Default path for json file with questions
-EXPORT_PATH = 'questions/export/'
-IMPORT_PATH = 'questions/import/questions.json'
+EXPORT_PATH = "questions/export/"
+IMPORT_PATH = "questions/import/"
+IMPORT_FILE_NAME = "questions.json"
 
 # Default time zone
 TIME_ZONE = "Europe/Minsk"
@@ -55,4 +56,4 @@ class FlaskConfig:
 
 
 # The name of groups that store topics for a certain type of question in the telegram bot
-JUST_QUESTION_GROUP_NAME = 'Just Question'
+JUST_QUESTION_GROUP_NAME = "Just Question"

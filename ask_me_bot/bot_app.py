@@ -8,9 +8,14 @@ from telebot.types import ReplyKeyboardRemove
 
 from ask_me_bot.questions.dataclasses import Question
 from ask_me_bot.bot_keyboards import get_start_keyboard, inline_for_just_question
-from questions.services import get_question_and_answers, get_question_id_from_question_name, \
-    get_explanation_from_question, get_all_questions_from_db, get_random_question_from_questions, \
-    get_detail_explanation_from_question
+from questions.services import (
+    get_question_and_answers,
+    get_question_id_from_question_name,
+    get_explanation_from_question,
+    get_all_questions_from_db,
+    get_random_question_from_questions,
+    get_detail_explanation_from_question,
+)
 from config import BOT_TOKEN, BLITZ_TIMER, logger
 
 
@@ -38,7 +43,12 @@ def start(message: types.Message) -> None:
 def send_just_question(message: types.Message) -> None:
     """Sends question with no answer options"""
     try:
-        _send_just_question(get_random_question_from_questions(get_all_questions_from_db(by='just_question')), message)
+        _send_just_question(
+            get_random_question_from_questions(
+                get_all_questions_from_db(by="just_question")
+            ),
+            message,
+        )
     except ApiException:
         logger.exception(ApiException)
         logger.error(traceback.format_exc())
@@ -49,7 +59,9 @@ def send_question(message: types.Message) -> None:
     """Sends the user a quiz with a question."""
     try:
         send_quiz(
-            get_question_and_answers(), message, reply_markup=get_start_keyboard(),
+            get_question_and_answers(),
+            message,
+            reply_markup=get_start_keyboard(),
         )
     except ApiException:
         logger.exception(ApiException)
@@ -97,10 +109,10 @@ def send_blitz_question(message: types.Message) -> None:
         logger.error(traceback.format_exc())
 
 
-@bot.callback_query_handler(func=lambda call: re.match(r'explanation', call.data))
+@bot.callback_query_handler(func=lambda call: re.match(r"explanation", call.data))
 def callback_inline_explanation(call):
     try:
-        question_id = call.data.replace('explanation', '')
+        question_id = call.data.replace("explanation", "")
         explanation = get_explanation_from_question(question_id)
         bot.send_message(call.message.chat.id, text=explanation)
     except ApiException:
@@ -108,10 +120,12 @@ def callback_inline_explanation(call):
         logger.error(traceback.format_exc())
 
 
-@bot.callback_query_handler(func=lambda call: re.match(r'detail_explanation', call.data))
+@bot.callback_query_handler(
+    func=lambda call: re.match(r"detail_explanation", call.data)
+)
 def callback_inline_detail_explanation(call):
     try:
-        question_id = call.data.replace('detail_explanation', '')
+        question_id = call.data.replace("detail_explanation", "")
         detail_explanation = get_detail_explanation_from_question(question_id)
         bot.send_message(call.message.chat.id, text=detail_explanation)
     except ApiException:
@@ -151,7 +165,9 @@ def _send_just_question(data: Question, message: types.Message) -> None:
     try:
         question_id = get_question_id_from_question_name(data.question_name)
         bot.send_message(
-            message.chat.id, data.question_name, reply_markup=inline_for_just_question(str(question_id)),
+            message.chat.id,
+            data.question_name,
+            reply_markup=inline_for_just_question(str(question_id)),
         )
     except ApiException:
         logger.exception(ApiException)
@@ -164,7 +180,7 @@ def _send_blitz_over_message(chat_id: int) -> None:
         bot.send_message(
             chat_id,
             text=f"В этот раз у тебя {total_points_in_blitz} "
-                 f"правильных ответов подряд! \nЗнай, ты всегда можешь испытать себя снова!",
+            f"правильных ответов подряд! \nЗнай, ты всегда можешь испытать себя снова!",
             reply_markup=get_start_keyboard(),
         )
     except ApiException:
@@ -178,7 +194,7 @@ def _send_blitz_timeout_message(chat_id: int) -> None:
         bot.send_message(
             chat_id,
             text=f"Старайся успевать отвечать до того, как кончится время.\n "
-                 f"У тебя {total_points_in_blitz} правильных ответов из {total_points_in_blitz + 1}",
+            f"У тебя {total_points_in_blitz} правильных ответов из {total_points_in_blitz + 1}",
             reply_markup=get_start_keyboard(),
         )
     except ApiException:
