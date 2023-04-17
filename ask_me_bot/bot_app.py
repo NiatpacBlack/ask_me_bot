@@ -6,6 +6,7 @@ from telebot import types, TeleBot
 from telebot.apihelper import ApiException
 from telebot.types import ReplyKeyboardRemove
 
+from ask_me_bot.auth.services import create_new_user_if_not_exist
 from ask_me_bot.questions.dataclasses import Question
 from ask_me_bot.bot_keyboards import get_start_keyboard, inline_for_just_question, get_themes_keyboard
 from questions.services import (
@@ -29,12 +30,18 @@ all_user_responses = []
 def start(message: types.Message) -> None:
     """Displays a welcome message and start menu to the user."""
     try:
+        create_new_user_if_not_exist({
+            "id": message.from_user.id,
+            "username": message.from_user.username,
+            "first_name": message.from_user.first_name,
+            "last_name": message.from_user.last_name,
+        })
         bot.send_message(
             message.chat.id,
             text=f"Здравствуйте, {message.from_user.full_name}, выберите действие:",
             reply_markup=get_start_keyboard(),
         )
-    except ApiException:
+    except (ApiException, KeyError):
         logger.exception(ApiException)
         logger.error(traceback.format_exc())
 
