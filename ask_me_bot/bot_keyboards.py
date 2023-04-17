@@ -5,7 +5,8 @@ from telebot.types import (
     ReplyKeyboardMarkup,
 )
 
-from ask_me_bot.questions.services import get_detail_explanation_from_question, get_themes_for_choices
+from ask_me_bot.questions.services import get_detail_explanation_from_question, get_themes_for_choices, \
+    get_not_empty_themes
 
 
 def get_start_keyboard() -> ReplyKeyboardMarkup:
@@ -38,7 +39,7 @@ def inline_for_just_question(question_id: str) -> InlineKeyboardMarkup:
 
 def get_themes_keyboard() -> InlineKeyboardMarkup:
     markup = InlineKeyboardMarkup()
-    themes = get_themes_for_choices()
+    themes = get_not_empty_themes()
     for theme in themes:
         markup.add(
             InlineKeyboardButton(

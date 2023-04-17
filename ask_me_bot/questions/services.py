@@ -65,8 +65,18 @@ def parse_questions_data_to_json(questions_data: list[tuple[Any, ...]]):
 
 
 def get_themes_for_choices() -> list[tuple[str, str]]:
-    """Get list of topics for SelectField in CreateQuestionForm."""
+    """Get list of themes for SelectField in CreateQuestionForm."""
     postgres_client.cursor.execute("""select theme_id, theme_name from themes;""")
+    themes = postgres_client.cursor.fetchall()
+    return themes
+
+
+def get_not_empty_themes() -> list[tuple[str, str]]:
+    """Get list of themes with at least one question."""
+    postgres_client.cursor.execute(
+        """
+        select theme_id, theme_name from themes join questions using(theme_id) group by theme_id, theme_name;
+        """)
     themes = postgres_client.cursor.fetchall()
     return themes
 
