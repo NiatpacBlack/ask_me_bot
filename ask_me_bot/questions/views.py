@@ -88,7 +88,10 @@ class QuestionView(MethodView):
 
             # Adding theme, question, and answers data to a form
             form.theme_id.data = question_with_theme_name.theme_name
-            form.theme_id.choices = get_themes_for_choices()
+            form.theme_id.choices = sorted(
+                get_themes_for_choices(),
+                key=lambda choice: choice != (question_with_theme_name.theme_id, question_with_theme_name.theme_name),
+            )
             form.question.data = question_with_theme_name.question_name
             form.explanation.data = question_with_theme_name.explanation
             form.detail_explanation.data = question_with_theme_name.detail_explanation

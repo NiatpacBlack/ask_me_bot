@@ -43,7 +43,7 @@ TEMPLATES_DIR = os.path.join(_basedir, "questions/templates")
 STATIC_DIR = os.path.join(_basedir, "questions/static")
 
 # A timer that determines the number of seconds it takes to answer a blitz question
-BLITZ_TIMER = 15
+BLITZ_TIMER = 30
 
 
 class FlaskConfig:

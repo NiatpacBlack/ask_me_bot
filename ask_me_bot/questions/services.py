@@ -122,7 +122,7 @@ def get_all_questions_with_theme_name_from_db() -> (
     )
 
 
-def get_random_question_from_questions(questions: list[Question, ...]) -> Question:
+def get_random_question(questions: list[Question, ...]) -> Question:
     """Returns one random question from the list of questions."""
     question = choice(questions)
     return question
@@ -241,7 +241,7 @@ def get_question_and_answers() -> QuestionForQuiz:
     shuffles the answers, and returns a tuple with the received data.
     """
 
-    question = get_random_question_from_questions(get_all_questions_from_db())
+    question = get_random_question(get_all_questions_from_db())
     answers = get_sorted_answers_from_question(question)
     correct_answer = answers[0]
 
@@ -305,12 +305,13 @@ def update_question_in_questions_table(
     postgres_client.db_connect.commit()
 
 
-def get_question_id_from_question_name(question_name: str) -> int | bool:
+def get_question_id_from_question_name(question_name: str) -> str | None:
     """Returns the question id from the database where the question name matches question_name."""
     query = f"""select question_id from questions where question_name = '{question_name}';"""
     postgres_client.cursor.execute(query)
     result = postgres_client.cursor.fetchone()
-    return result[0] if result else False
+    if result:
+        return str(result[0])
 
 
 def insert_answers_for_question(
@@ -471,11 +472,3 @@ def get_questions_by_theme_id(theme_id: str) -> list[Question, ...]:
     postgres_client.cursor.execute(query)
     questions = postgres_client.cursor.fetchall()
     return [Question(*question) for question in questions]
-
-
-if __name__ == "__main__":
-    from ask_me_bot.questions.converter import parse_data_from_json
-
-
-    test_data = parse_data_from_json(path_to_file="import/questions.json")
-    insert_data_with_questions_to_database(test_data)

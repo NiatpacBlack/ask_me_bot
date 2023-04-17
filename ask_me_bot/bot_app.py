@@ -13,7 +13,7 @@ from questions.services import (
     get_question_id_from_question_name,
     get_explanation_from_question,
     get_all_questions_from_db,
-    get_random_question_from_questions,
+    get_random_question,
     get_detail_explanation_from_question, get_questions_by_theme_id,
 )
 from config import BOT_TOKEN, BLITZ_TIMER, logger
@@ -44,7 +44,7 @@ def send_just_question(message: types.Message) -> None:
     """Sends question with no answer options."""
     try:
         _send_just_question(
-            get_random_question_from_questions(
+            get_random_question(
                 get_all_questions_from_db(by="just_question")
             ),
             message,
@@ -69,10 +69,10 @@ def send_just_question_by_theme(message: types.Message) -> None:
 
 
 @bot.message_handler(func=lambda m: m.text == "Квиз вопрос")
-def send_question(message: types.Message) -> None:
+def send_quiz(message: types.Message) -> None:
     """Sends the user a quiz with a question."""
     try:
-        send_quiz(
+        _send_quiz(
             get_question_and_answers(),
             message,
             reply_markup=get_start_keyboard(),
@@ -83,13 +83,13 @@ def send_question(message: types.Message) -> None:
 
 
 @bot.message_handler(func=lambda m: m.text == "Блиц")
-def send_blitz_question(message: types.Message) -> None:
+def send_blitz_quiz(message: types.Message) -> None:
     """Starts a user poll blitz. Sends the user questions for the time before the first error."""
     global total_points_in_blitz
     _clear_global_variables()
 
     try:
-        index_current_answer = send_quiz(
+        index_current_answer = _send_quiz(
             get_question_and_answers(),
             message,
             with_period=BLITZ_TIMER,
@@ -99,11 +99,13 @@ def send_blitz_question(message: types.Message) -> None:
         time_start = 0
 
         while time_start < BLITZ_TIMER:
+
+            # if the user answered the question
             if len(all_user_responses) == total_points_in_blitz + 1:
                 if all_user_responses[-1] == index_current_answer:
                     total_points_in_blitz += 1
 
-                    index_current_answer = send_quiz(
+                    index_current_answer = _send_quiz(
                         get_question_and_answers(), message, with_period=BLITZ_TIMER
                     )
 
@@ -112,6 +114,8 @@ def send_blitz_question(message: types.Message) -> None:
                     _send_blitz_over_message(message.chat.id)
                     _clear_global_variables()
                     return None
+
+            # if the question was not answered
             else:
                 time_start += 1
                 time.sleep(1)
@@ -152,7 +156,7 @@ def callback_inline_theme_for_just_question(call):
     try:
         theme_id = call.data.replace("just_question_theme", "")
         _send_just_question(
-            get_random_question_from_questions(
+            get_random_question(
                 get_questions_by_theme_id(theme_id)
             ),
             call.message,
@@ -168,7 +172,7 @@ def handle_poll_answer(poll_answer) -> None:
     all_user_responses.append(int(poll_answer.option_ids[0]))
 
 
-def send_quiz(data, message: types.Message, with_period=None, reply_markup=None) -> int:
+def _send_quiz(data, message: types.Message, with_period=None, reply_markup=None) -> int:
     """Send a quiz to a user with a question."""
     try:
         bot.send_poll(
@@ -196,7 +200,7 @@ def _send_just_question(data: Question, message: types.Message) -> None:
         bot.send_message(
             message.chat.id,
             data.question_name,
-            reply_markup=inline_for_just_question(str(question_id)),
+            reply_markup=inline_for_just_question(question_id),
         )
     except ApiException:
         logger.exception(ApiException)
