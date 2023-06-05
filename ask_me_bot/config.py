@@ -31,7 +31,7 @@ DB_PORT = os.getenv("DB_PORT")
 # Default path for json file with questions
 EXPORT_PATH = "ask_me_bot/questions/export/"
 IMPORT_PATH = "ask_me_bot/questions/import/"
-IMPORT_FILE_NAME = "questions.json"
+IMPORT_FILE_NAME = os.getenv("IMPORT_FILE_NAME")
 
 # Default time zone
 TIME_ZONE = "Europe/Minsk"
