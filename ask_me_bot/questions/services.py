@@ -15,7 +15,7 @@ from ask_me_bot.questions.dataclasses import (
     Answer,
     AnswersForQuestion,
     QuestionForDatabase,
-    QuestionForQuiz,
+    QuestionForQuiz, ThemeStat,
 )
 from ask_me_bot.questions.exceptions import (
     GetQuestionWithThemeNameError,
@@ -107,7 +107,7 @@ def get_all_questions_from_db(
     return [Question(*question) for question in questions]
 
 
-def get_all_themes_from_db() -> list[Theme, ...]:
+def get_all_themes_from_db() -> list[Theme]:
     """Returns all themes from the database."""
     themes = postgres_client.select_all_from_table("themes")
     return [Theme(*theme) for theme in themes]
@@ -482,3 +482,24 @@ def get_questions_by_theme_id(theme_id: str) -> list[Question, ...]:
     postgres_client.cursor.execute(query)
     questions = postgres_client.cursor.fetchall()
     return [Question(*question) for question in questions]
+
+
+def get_questions_statistics() -> dict[Theme.theme_name, ThemeStat]:
+    """
+    Gets statistics on the total number of questions for a particular topic, the percentage of questions.
+    Forms a dictionary where the key is the theme name and the value is dataclass ThemeStat.
+    """
+    total_questions_count = len(get_all_questions_from_db())
+    themes = get_all_themes_from_db()
+    result = {}
+
+    for theme in themes:
+        questions_count = len(get_questions_by_theme_id(str(theme.theme_id)))
+        percentage_of_all = questions_count / (total_questions_count * 0.01)
+
+        result[theme.theme_name] = ThemeStat(
+            questions_count=questions_count,
+            percentage_of_all=percentage_of_all,
+        )
+
+    return result

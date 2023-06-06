@@ -24,7 +24,7 @@ from ask_me_bot.questions.services import (
     update_theme_in_database,
     delete_theme_from_database,
     get_question_data_from_database,
-    parse_questions_data_to_json,
+    parse_questions_data_to_json, get_questions_statistics,
 )
 
 
@@ -69,10 +69,13 @@ class MainView(MethodView):
     def get(self):
         questions = get_all_questions_with_theme_name_from_db()
         themes = get_all_themes_from_db()
+        questions_stat = get_questions_statistics()
+
         return render_template(
             "main_page.html",
             questions=questions,
             themes=themes,
+            questions_stat=questions_stat,
         )
 
 

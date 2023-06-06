@@ -69,3 +69,11 @@ class QuestionForQuiz:
     answers: list[str, ...]
     index_current_answer: int
     explanation: str
+
+
+@dataclass(slots=True, frozen=True)
+class ThemeStat:
+    """Description of the values of statistics on questions related to a particular topic."""
+
+    questions_count: int
+    percentage_of_all: float

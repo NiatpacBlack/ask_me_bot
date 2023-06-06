@@ -47,6 +47,8 @@
                 <tr>
                     <th class="text-center">Id</th>
                     <th class="text-center">Тема</th>
+                    <th class="text-center">Количество вопросов</th>
+                    <th class="text-center">Процент от общего количества</th>
                     <th class="text-center">Время создания</th>
                     <th class="text-center">Время изменения</th>
                 </tr>
@@ -57,6 +59,20 @@
                         <tr theme-id={{ theme.theme_id }}>
                             <td>{{ theme.theme_id }}</td>
                             <td>{{ theme.theme_name }}</td>
+                            <td>
+                                {% if questions_stat.get(theme.theme_name) %}
+                                    {{ questions_stat[theme.theme_name].questions_count }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if questions_stat.get(theme.theme_name) %}
+                                    {{ "%0.2f %%"|format(questions_stat[theme.theme_name].percentage_of_all) }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
                             <td>{{ theme.creation_date }}</td>
                             <td>{{ theme.modification_date or '-' }}</td>
                         </tr>
