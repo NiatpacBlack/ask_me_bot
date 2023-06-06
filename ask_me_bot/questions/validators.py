@@ -24,8 +24,7 @@ def validate_question_data(data: QuestionForDatabase) -> None:
         _incorrect_answers_validation(data.incorrect_answers)
     except KeyError:
         error_message = "Invalid input data, you need to pass data with fields corresponding to the quiz question."
-        logger.exception(error_message)
-        logger.error(traceback.format_exc())
+        logger.error(error_message)
         raise DataKeysError(error_message)
 
 
@@ -37,8 +36,7 @@ def validate_theme_data(data: dict[str, str]) -> None:
             raise ExistingThemeError("A theme with the same name already exists.")
     except KeyError:
         error_message = "Invalid input data, you need to pass data with fields corresponding to the theme"
-        logger.exception(error_message)
-        logger.error(traceback.format_exc())
+        logger.error(error_message)
         raise DataKeysError(error_message)
 
 
@@ -52,8 +50,7 @@ def _question_validation(question: str) -> None:
             f"The length of the question should not exceed 255 characters. "
             f"Incorrect question: {question}"
         )
-        logger.exception(error_message)
-        logger.error(traceback.format_exc())
+        logger.error(error_message)
         raise QuestionLengthError(error_message)
 
 
@@ -67,8 +64,7 @@ def _explanation_validation(explanation: str) -> None:
             "The length of the explanation should not exceed 200 characters. "
             f"Incorrect explanation: {explanation}"
         )
-        logger.exception(error_message)
-        logger.error(traceback.format_exc())
+        logger.error(error_message)
         raise ExplanationLengthError(error_message)
 
 
@@ -82,8 +78,7 @@ def _detail_explanation_validation(explanation: str) -> None:
             "The length of the detail explanation should not exceed 4096 characters. "
             f"Incorrect explanation: {explanation}"
         )
-        logger.exception(error_message)
-        logger.error(traceback.format_exc())
+        logger.error(error_message)
         raise DetailExplanationLengthError(error_message)
 
 
@@ -97,8 +92,7 @@ def _correct_answer_validation(correct_answer: str) -> None:
             "The length of the correct answer should not exceed 100 characters. "
             f"Incorrect answer: {correct_answer}"
         )
-        logger.exception(error_message)
-        logger.error(traceback.format_exc())
+        logger.error(error_message)
         raise AnswerLengthError(error_message)
 
 
@@ -113,8 +107,7 @@ def _incorrect_answers_validation(incorrect_answers: list[str, ...]) -> None:
             "Too many incorrect answers passed, there should not be more than 9. "
             f"Incorrect Answers: {incorrect_answers}"
         )
-        logger.exception(error_message)
-        logger.error(traceback.format_exc())
+        logger.error(error_message)
         raise LotIncorrectAnswersError(error_message)
     for answer in incorrect_answers:
         if len(answer) > 100:
@@ -122,6 +115,5 @@ def _incorrect_answers_validation(incorrect_answers: list[str, ...]) -> None:
                 "The length of the correct answer should not exceed 100 characters. "
                 f"Incorrect answer: {answer}"
             )
-            logger.exception(error_message)
-            logger.error(traceback.format_exc())
+            logger.error(error_message)
             raise AnswerLengthError(error_message)

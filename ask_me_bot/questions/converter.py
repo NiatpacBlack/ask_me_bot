@@ -22,7 +22,7 @@ def add_data_to_json_file(data: dict[str, str, str, str, dict[str, str]]) -> Non
 
 
 def parse_data_from_json(
-    path_to_file: str, file_name: str
+        path_to_file: str, file_name: str
 ) -> list[QuestionForDatabase, ...]:
     """
     Receives as input the path to the json file containing information for the quiz in the telegram.
@@ -53,8 +53,8 @@ def parse_data_from_json(
     with open(path_to_file + file_name, encoding="utf-8") as file:
         json_load = json.load(file)
         data = []
-        for question in json_load["data"]:
-            try:
+        try:
+            for question in json_load["data"]:
                 theme_id = get_theme_id_from_theme_name(theme_name=question["theme"])
                 result = QuestionForDatabase(
                     theme_id=theme_id
@@ -70,15 +70,14 @@ def parse_data_from_json(
                         answer for answer in question["incorrect_answers"].values()
                     ],
                 )
-            except Exception as e:
-                error_message = (
-                    "The data passed in the json file is incorrect, "
-                    f"check the data against the documentation format. Info: {e}"
-                )
-                logger.exception(error_message)
-                logger.error(traceback.format_exc())
-                raise JsonIncorrectData(error_message)
 
-            data.append(result)
+                data.append(result)
+        except Exception as e:
+            error_message = (
+                "The data passed in the json file is incorrect, "
+                f"check the data against the documentation format. Info: {e}"
+            )
+            logger.error(error_message)
+            raise JsonIncorrectData(error_message)
 
     return data

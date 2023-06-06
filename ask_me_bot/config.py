@@ -6,17 +6,17 @@ from loguru import logger
 
 load_dotenv()
 
+# Variable in which the executable directory of the script is placed
+_basedir = os.path.abspath(os.path.dirname(__file__))
+
 # Log file settings
 logger.add(
-    "../logs/bot_logs.log",
+    os.path.join(_basedir, "logs/logs.log"),
     format="{time} {level} {message}",
     level="DEBUG",
     rotation="1 day",
     compression="zip",
 )
-
-# Variable in which the executable directory of the script is placed
-_basedir = os.path.abspath(os.path.dirname(__file__))
 
 # Telegram bot token
 BOT_TOKEN = os.getenv("BOT_TOKEN")

@@ -1,6 +1,5 @@
 import re
 import time
-import traceback
 
 from telebot import types, TeleBot
 from telebot.apihelper import ApiException
@@ -42,8 +41,7 @@ def start(message: types.Message) -> None:
             reply_markup=get_start_keyboard(),
         )
     except (ApiException, KeyError):
-        logger.exception(ApiException)
-        logger.error(traceback.format_exc())
+        logger.error(ApiException)
 
 
 @bot.message_handler(func=lambda m: m.text == "Простой вопрос")
@@ -57,8 +55,7 @@ def send_just_question(message: types.Message) -> None:
             message,
         )
     except ApiException:
-        logger.exception(ApiException)
-        logger.error(traceback.format_exc())
+        logger.error(ApiException)
 
 
 @bot.message_handler(func=lambda m: m.text == "Простой вопрос по теме")
@@ -71,8 +68,7 @@ def send_just_question_by_theme(message: types.Message) -> None:
             reply_markup=get_themes_keyboard(),
         )
     except ApiException:
-        logger.exception(ApiException)
-        logger.error(traceback.format_exc())
+        logger.error(ApiException)
 
 
 @bot.message_handler(func=lambda m: m.text == "Квиз вопрос")
@@ -85,8 +81,7 @@ def send_quiz(message: types.Message) -> None:
             reply_markup=get_start_keyboard(),
         )
     except ApiException:
-        logger.exception(ApiException)
-        logger.error(traceback.format_exc())
+        logger.error(ApiException)
 
 
 @bot.message_handler(func=lambda m: m.text == "Блиц")
@@ -130,8 +125,7 @@ def send_blitz_quiz(message: types.Message) -> None:
         _send_blitz_timeout_message(message.chat.id)
         _clear_global_variables()
     except ApiException:
-        logger.exception(ApiException)
-        logger.error(traceback.format_exc())
+        logger.error(ApiException)
 
 
 @bot.callback_query_handler(func=lambda call: re.match(r"explanation", call.data))
@@ -141,8 +135,7 @@ def callback_inline_explanation(call):
         explanation = get_explanation_from_question(question_id)
         bot.send_message(call.message.chat.id, text=explanation)
     except ApiException:
-        logger.exception(ApiException)
-        logger.error(traceback.format_exc())
+        logger.error(ApiException)
 
 
 @bot.callback_query_handler(
@@ -154,8 +147,7 @@ def callback_inline_detail_explanation(call):
         detail_explanation = get_detail_explanation_from_question(question_id)
         bot.send_message(call.message.chat.id, text=detail_explanation)
     except ApiException:
-        logger.exception(ApiException)
-        logger.error(traceback.format_exc())
+        logger.error(ApiException)
 
 
 @bot.callback_query_handler(func=lambda call: re.match(r"just_question_theme", call.data))
@@ -169,8 +161,7 @@ def callback_inline_theme_for_just_question(call):
             call.message,
         )
     except ApiException:
-        logger.exception(ApiException)
-        logger.error(traceback.format_exc())
+        logger.error(ApiException)
 
 
 @bot.poll_answer_handler()
@@ -194,8 +185,7 @@ def _send_quiz(data, message: types.Message, with_period=None, reply_markup=None
             reply_markup=reply_markup,
         )
     except ApiException:
-        logger.exception(ApiException)
-        logger.error(traceback.format_exc())
+        logger.error(ApiException)
 
     return data.index_current_answer
 
@@ -210,8 +200,7 @@ def _send_just_question(data: Question, message: types.Message) -> None:
             reply_markup=inline_for_just_question(question_id),
         )
     except ApiException:
-        logger.exception(ApiException)
-        logger.error(traceback.format_exc())
+        logger.error(ApiException)
 
 
 def _send_blitz_over_message(chat_id: int) -> None:
@@ -224,8 +213,7 @@ def _send_blitz_over_message(chat_id: int) -> None:
             reply_markup=get_start_keyboard(),
         )
     except ApiException:
-        logger.exception(ApiException)
-        logger.error(traceback.format_exc())
+        logger.error(ApiException)
 
 
 def _send_blitz_timeout_message(chat_id: int) -> None:
@@ -238,8 +226,7 @@ def _send_blitz_timeout_message(chat_id: int) -> None:
             reply_markup=get_start_keyboard(),
         )
     except ApiException:
-        logger.exception(ApiException)
-        logger.error(traceback.format_exc())
+        logger.error(ApiException)
 
 
 def _clear_global_variables() -> None:
