@@ -119,31 +119,23 @@ class QuestionView(MethodView):
         )
 
     def put(self, question_id: str):
-        form = CreateQuestionForm()
+        request_data = request.form.to_dict()
 
-        if form.validate_on_submit():
-            request_data = request.form.to_dict()
+        try:
+            data = parse_request_data_to_question_format(request_data)
+            incorrect_answers_id = request_data["incorrect_answers_id"].split()
+            correct_answer_id = request_data["correct_answers_id"]
+        except KeyError as e:
+            logger.exception(KeyError)
+            logger.error(traceback.format_exc())
+            return {
+                "error": f"Invalid data passed in the request. Error information: {e}"
+            }, HTTPStatus.BAD_REQUEST
 
-            try:
-                data = parse_request_data_to_question_format(request_data)
-                incorrect_answers_id = request_data["incorrect_answers_id"].split()
-                correct_answer_id = request_data["correct_answers_id"]
-            except KeyError as e:
-                logger.exception(KeyError)
-                logger.error(traceback.format_exc())
-                return {
-                    "error": f"Invalid data passed in the request. Error information: {e}"
-                }, HTTPStatus.BAD_REQUEST
-
-            update_question_in_database(
-                data, question_id, correct_answer_id, incorrect_answers_id
-            )
-            return {}, HTTPStatus.OK
-
-        logger.exception("The data submitted in the form was not validated.")
-        return {
-            "error": "The data submitted in the form was not validated. Check the correctness of the entered data.",
-        }, HTTPStatus.BAD_REQUEST
+        update_question_in_database(
+            data, question_id, correct_answer_id, incorrect_answers_id
+        )
+        return {}, HTTPStatus.OK
 
     def delete(self, question_id: str):
         try:
