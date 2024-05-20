@@ -57,3 +57,6 @@ class FlaskConfig:
 
 # The name of groups that store topics for a certain type of question in the telegram bot
 JUST_QUESTION_GROUP_NAME = "Just Question"
+
+# Topics listed in this variable will be excluded from the output in the bot
+EXCLUDED_QUESTION_TOPICS = ["Python Quiz", ]

@@ -5,14 +5,16 @@ from telebot.types import (
     ReplyKeyboardMarkup,
 )
 
-from ask_me_bot.questions.services import get_detail_explanation_from_question, get_themes_for_choices, \
+from ask_me_bot.questions.services import get_detail_explanation_from_question, \
     get_not_empty_themes
+from ask_me_bot.config import EXCLUDED_QUESTION_TOPICS
 
 
 def get_start_keyboard() -> ReplyKeyboardMarkup:
     """Returns the buttons that drop down at the start of the bot."""
 
     keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
+    keyboard.add(types.KeyboardButton(text="Простой вопрос Python"))
     keyboard.add(types.KeyboardButton(text="Простой вопрос"))
     keyboard.add(types.KeyboardButton(text="Простой вопрос по теме"))
     keyboard.add(types.KeyboardButton(text="Квиз вопрос"))
@@ -37,13 +39,14 @@ def inline_for_just_question(question_id: str) -> InlineKeyboardMarkup:
     return markup
 
 
-def get_themes_keyboard() -> InlineKeyboardMarkup:
+def get_themes_keyboard(exclude: list = EXCLUDED_QUESTION_TOPICS) -> InlineKeyboardMarkup:
     markup = InlineKeyboardMarkup()
     themes = get_not_empty_themes()
     for theme in themes:
-        markup.add(
-            InlineKeyboardButton(
-                text=f"{theme[1]}", callback_data=f"just_question_theme{theme[0]}"
+        if theme[1] not in exclude:
+            markup.add(
+                InlineKeyboardButton(
+                    text=f"{theme[1]}", callback_data=f"just_question_theme{theme[0]}"
+                )
             )
-        )
     return markup

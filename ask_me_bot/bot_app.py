@@ -14,7 +14,7 @@ from questions.services import (
     get_explanation_from_question,
     get_all_questions_from_db,
     get_random_question,
-    get_detail_explanation_from_question, get_questions_by_theme_id,
+    get_detail_explanation_from_question, get_questions_by_theme_id, get_python_theme_id,
 )
 from config import BOT_TOKEN, BLITZ_TIMER, logger
 
@@ -29,18 +29,36 @@ all_user_responses = []
 def start(message: types.Message) -> None:
     """Displays a welcome message and start menu to the user."""
     try:
-        create_new_user_if_not_exist({
-            "id": message.from_user.id,
-            "username": message.from_user.username,
-            "first_name": message.from_user.first_name,
-            "last_name": message.from_user.last_name,
-        })
+        # create_new_user_if_not_exist({
+        #     "id": message.from_user.id,
+        #     "username": message.from_user.username,
+        #     "first_name": message.from_user.first_name,
+        #     "last_name": message.from_user.last_name,
+        # })
         bot.send_message(
             message.chat.id,
             text=f"Здравствуйте, {message.from_user.full_name}, выберите действие:",
             reply_markup=get_start_keyboard(),
         )
     except (ApiException, KeyError):
+        logger.error(ApiException)
+
+
+@bot.message_handler(func=lambda m: m.text == "Простой вопрос Python")
+def send_just_question_python(message: types.Message) -> None:
+    """Sends question with no answer options by Python topics."""
+    try:
+        python_theme_id = get_python_theme_id()
+        if not python_theme_id:
+            raise ApiException
+
+        _send_just_question(
+            get_random_question(
+                get_questions_by_theme_id(python_theme_id)
+            ),
+            message,
+        )
+    except ApiException:
         logger.error(ApiException)
 
 
@@ -236,4 +254,10 @@ def _clear_global_variables() -> None:
 
 
 if __name__ == "__main__":
-    bot.polling()
+    import requests
+    while True:
+        try:
+            bot.polling(timeout=60)
+            break
+        except requests.exceptions.ReadTimeout:
+            continue

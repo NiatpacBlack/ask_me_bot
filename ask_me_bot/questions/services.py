@@ -2,7 +2,7 @@
 import json
 from datetime import datetime
 from random import choice, shuffle
-from typing import Any, Literal
+from typing import Any, Literal, Optional
 
 import pytz
 
@@ -111,6 +111,15 @@ def get_all_themes_from_db() -> list[Theme]:
     """Returns all themes from the database."""
     themes = postgres_client.select_all_from_table("themes")
     return [Theme(*theme) for theme in themes]
+
+
+def get_python_theme_id() -> Optional[Theme.theme_id]:
+    """Returns the python theme id if it finds one of the title matches."""
+    themes = get_all_themes_from_db()
+    for theme in themes:
+        if theme.theme_name in ('Python', 'python'):
+            return theme.theme_id
+
 
 
 def get_all_questions_with_theme_name_from_db() -> (
