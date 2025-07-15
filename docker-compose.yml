@@ -1,0 +1,71 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: ask_me_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER}" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+
+  init_db:
+    build:
+      context: .
+    command: bash -c "PYTHONPATH=/app python ask_me_bot/questions/models.py"
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - backend
+
+
+  ask_me_bot:
+    build:
+      context: .
+    container_name: ask_me_bot
+    restart: unless-stopped
+    volumes:
+      - ./ask_me_bot:/app/ask_me_bot
+      - ./gunicorn_conf.py:/app/gunicorn_conf.py
+      - ./wsgi.py:/app/wsgi.py
+      - /tmp:/tmp
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+    networks:
+      - backend
+
+  nginx:
+    image: nginx:latest
+    container_name: ask_me_nginx
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/ask_me_bot.conf:/etc/nginx/conf.d/default.conf:ro
+      - /tmp:/tmp
+    depends_on:
+      - ask_me_bot
+    networks:
+      - backend
+
+
+volumes:
+  postgres_data:
+
+networks:
+  backend:
+    driver: bridge

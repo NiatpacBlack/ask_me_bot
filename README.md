@@ -47,77 +47,14 @@ Through it, you can add a new topic for questions, add and edit questions, delet
 
 `waitress-serve --listen=127.0.0.1:5000 wsgi:app`
 
-<details>
-  <summary>
-    <b>Setting up request proxying with nginx:</b>
-  </summary>
+## Launching with Docker
 
-  * Install nginx on your system. For ubuntu, use the command `sudo apt install nginx`
-    
-  <details>
-    <summary>
-      If you do not have Ubuntu, but Manjaro, like me. And when installing nginx, there are no required folders.
-    </summary>
+To start the entire application stack (Postgres, DB initialization, bot, and nginx), simply run:
 
-   * Insall nginx:
-    
-   `sudo pacman -S nginx`
+```bash
+make all
+```
 
-   * Create directories:
-  
-   `sudo mkdir /etc/nginx/sites-enabled`
-
-   `sudo mkdir /etc/nginx/sites-available`
-
-   `sudo mkdir /etc/nginx/conf.d`
-   * Edit the config, connect the sites-enabled folder:
-    
-   `sudo nano /etc/nginx/nginx.conf`
-    
-
-   ```
-    http {
-        
-        ##
-        # Paste these lines into the http block in your config
-        ##
-    
-        include /etc/nginx/conf.d/*.conf;
-        include /etc/nginx/sites-enabled/*;
-        
-    }
-   ```
-  
-  </details>
- 
-   * Create a config file for the application 
-    
-   `sudo nano /etc/nginx/sites-available/ask_me_bot.conf`
-
-   ```
-    server {
-        listen 80;  
-        
-        access_log /var/log/nginx/ask_me_bot.access.log;
-        error_log /var/log/nginx/ask_me_bot.error.log; 
-        
-        location / {
-            proxy_pass http://127.0.0.1:5000;
-            proxy_set_header Host $host;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        }
-    }    
-   ```
-
-   * Add a link to config to the sites-enabled folder
-    
-   `sudo ln -s /etc/nginx/sites-available/ask_me_bot.conf /etc/nginx/sites-enabled/`
-   * Restart the server
-
-   `sudo systemctl restart nginx`
-   
-  #### We can check the admin panel at 127.0.0.1 (By default, nginx runs on port 80, you can change it in the config to any free port.) 
-</details>
-
+The application will then be accessible via nginx at http://localhost.
 
 
