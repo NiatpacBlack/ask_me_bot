@@ -1,0 +1,84 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: amb_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER}" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+
+  init_db:
+    build:
+      context: .
+    command: bash -c "PYTHONPATH=/app python ask_me_bot/questions/models.py"
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - backend
+
+
+  web_admin:
+    build:
+      context: .
+    container_name: amb_web_admin
+    restart: unless-stopped
+    volumes:
+      - /tmp:/tmp
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+      - init_db
+    networks:
+      - backend
+
+  ask_me_bot:
+    build:
+      context: .
+    container_name: ask_me_bot
+    command: bash -c "PYTHONPATH=/app python ask_me_bot/bot_app.py"
+    restart: unless-stopped
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+      - init_db
+    environment:
+      - BOT_ENV=prod
+    networks:
+      - backend
+
+  nginx:
+    image: nginx:latest
+    container_name: amb_nginx
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/ask_me_bot.conf:/etc/nginx/conf.d/default.conf:ro
+      - /tmp:/tmp
+    depends_on:
+      - web_admin
+    networks:
+      - backend
+
+volumes:
+  postgres_data:
+
+networks:
+  backend:
+    driver: bridge

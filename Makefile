@@ -1,6 +1,8 @@
 # Makefile for Ask Me Bot Project
 
-COMPOSE = docker-compose
+ENV ?= dev
+COMPOSE_FILE=docker-compose.$(ENV).yml
+COMPOSE=docker-compose -f $(COMPOSE_FILE)
 PROJECT_NAME = ask_me_bot
 
 .PHONY: help postgres init-db start all down build logs bash
