@@ -5,7 +5,6 @@ from telebot import types, TeleBot
 from telebot.apihelper import ApiException
 from telebot.types import ReplyKeyboardRemove
 
-from ask_me_bot.auth.services import create_new_user_if_not_exist
 from ask_me_bot.questions.dataclasses import Question
 from ask_me_bot.bot_keyboards import get_start_keyboard, inline_for_just_question, get_themes_keyboard
 from questions.services import (
@@ -82,7 +81,7 @@ def send_just_question_by_theme(message: types.Message) -> None:
     try:
         bot.send_message(
             message.chat.id,
-            text=f"Выберите тему:",
+            text="Выберите тему:",
             reply_markup=get_themes_keyboard(),
         )
     except ApiException:
