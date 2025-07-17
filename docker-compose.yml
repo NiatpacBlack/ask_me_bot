@@ -54,6 +54,7 @@ services:
       context: .
     container_name: ask_me_bot
     command: bash -c "PYTHONPATH=/app python ask_me_bot/bot_app.py"
+    restart: unless-stopped
     env_file:
       - .env
     depends_on:
@@ -63,6 +64,8 @@ services:
       - BOT_ENV=prod
     volumes:
       - .:/app
+    networks:
+      - backend
 
   nginx:
     image: nginx:latest
