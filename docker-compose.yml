@@ -1,7 +1,7 @@
 services:
   postgres:
     image: postgres:15
-    container_name: ask_me_postgres
+    container_name: amb_postgres
     restart: always
     environment:
       POSTGRES_DB: ${DB_NAME}
@@ -31,10 +31,10 @@ services:
       - backend
 
 
-  ask_me_bot:
+  web_admin:
     build:
       context: .
-    container_name: ask_me_bot
+    container_name: amb_web_admin
     restart: unless-stopped
     volumes:
       - ./ask_me_bot:/app/ask_me_bot
@@ -45,12 +45,28 @@ services:
       - .env
     depends_on:
       - postgres
+      - init_db
     networks:
       - backend
 
+  ask_me_bot:
+    build:
+      context: .
+    container_name: ask_me_bot
+    command: bash -c "PYTHONPATH=/app python ask_me_bot/bot_app.py"
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+      - init_db
+    environment:
+      - BOT_ENV=prod
+    volumes:
+      - .:/app
+
   nginx:
     image: nginx:latest
-    container_name: ask_me_nginx
+    container_name: amb_nginx
     restart: always
     ports:
       - "80:80"
@@ -58,10 +74,9 @@ services:
       - ./nginx/ask_me_bot.conf:/etc/nginx/conf.d/default.conf:ro
       - /tmp:/tmp
     depends_on:
-      - ask_me_bot
+      - web_admin
     networks:
       - backend
-
 
 volumes:
   postgres_data:

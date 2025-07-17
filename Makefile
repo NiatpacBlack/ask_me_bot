@@ -11,7 +11,7 @@ help:
 	@echo "  make all         - Full startup: postgres → init-db → app + nginx"
 	@echo "  make postgres    - Start only PostgreSQL container"
 	@echo "  make init-db     - Initialize the database (idempotent)"
-	@echo "  make start       - Start ask_me_bot and nginx"
+	@echo "  make start       - Start web_admin, ask_me_bot and nginx"
 	@echo "  make down        - Stop and remove all containers"
 	@echo "  make build       - Build all docker images"
 	@echo "  make logs        - Show all logs"
@@ -20,7 +20,7 @@ help:
 
 # Step 1: Start only the PostgreSQL container
 postgres:
-	$(COMPOSE) up -d db
+	$(COMPOSE) up -d postgres
 
 # Step 2: Run database migration (create tables)
 init-db:
@@ -28,7 +28,7 @@ init-db:
 
 # Step 3: Start the application and nginx
 start:
-	$(COMPOSE) up -d ask_me_bot nginx
+	$(COMPOSE) up -d web_admin ask_me_bot nginx
 
 # Step 4: All in one
 all: postgres init-db start
