@@ -247,10 +247,35 @@ def _clear_global_variables() -> None:
 
 
 if __name__ == "__main__":
-    import requests
-    while True:
+    from signal import signal, SIGINT, SIGTERM
+    from threading import Event
+    from requests.exceptions import ReadTimeout, RequestException, ConnectionError
+
+
+    _shutdown_event: Event = Event()
+
+
+    def _shutdown_handler(_signum: int, _frame: object) -> None:
+        """
+        Signal handler that sets the shutdown event to initiate graceful termination.
+
+        Args:
+            _signum (int): Signal number (e.g., SIGINT or SIGTERM).
+            _frame (object): Current stack frame (unused).
+        """
+        _shutdown_event.set()
+
+
+    signal(SIGTERM, _shutdown_handler)
+    signal(SIGINT, _shutdown_handler)
+
+    while not _shutdown_event.is_set():
         try:
             bot.polling(timeout=60)
             break
-        except requests.exceptions.ReadTimeout:
+        except ReadTimeout:
+            continue
+        except (RequestException, ConnectionError):
+            if _shutdown_event.is_set():
+                break
             continue
